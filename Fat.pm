@@ -9,7 +9,7 @@ require AutoLoader;
 
 @ISA = qw(Exporter DynaLoader);
 @EXPORT = qw();
-$VERSION = '1.04';
+$VERSION = '1.05';
 
 'Tree::Fat'->bootstrap($VERSION);
 

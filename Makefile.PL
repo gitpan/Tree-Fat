@@ -19,7 +19,7 @@ if ($testmode) {
     } else {
 	push(@OBJ, qw(tietv.o tvcommon.o));
     }
-    push(@FLAGS, '-g');
+    push(@FLAGS, OPTIMIZE => '-g');
 } else {
     warn "...setting symlinks for launch\n";
     symlink "setup/tv.prod", "tietv.tmpl";
@@ -29,12 +29,16 @@ if ($testmode) {
 
 #my $prof = '-fprofile-arcs -ftest-coverage';
 
+my @PREFIX = (PREFIX => $ENV{PERL5PREFIX})
+	if exists $ENV{PERL5PREFIX};
+
 WriteMakefile(
+	      @PREFIX,
+	      @FLAGS,
 	      NAME		=> 'Tree::Fat',
 	      PREREQ_PM		=> { Test => 0.08, @PREREQ },
 	      EXE_FILES		=> [qw(tvgen.pl)],
-	      OPTIMIZE		=> join(' ', '-I.', @FLAGS),
-
+	      INC => '-I.',
 	      VERSION_FROM	=> 'Fat.pm',
 #	      CC => "insure",
 	      OBJECT		=> join(' ', qw(Fat.o), @OBJ),
@@ -42,7 +46,6 @@ WriteMakefile(
 				    'Fat.pm' => '$(INST_LIBDIR)/Fat.pm',
 				    (map { $_=>'$(INST_LIBDIR)/Fat/'.$_ } @tvlib)
 				   },
-              dist		=> {COMPRESS=>'gzip -9f', SUFFIX => 'gz'},
 );
 
 sub MY::postamble {

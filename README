@@ -22,28 +22,18 @@ preserving the functional abstraction.
 Get it via http://www.perl.com/CPAN/authors/id/JPRIT/ !
 
 
+** 11-04-98 RELEASE 1.05
+
+- Tweaks for MIN_PERL_DEFINE.
+
+- Renamed tvseek.ch -> tvseek.h to avoid confusing dumb compilers.
+
+- Switched tvgen.pl to use 'cp -f'.
+
+
 ** 07-11-98 RELEASE 1.04
 
-- Fixed minor hiccups noticed by cpan-testers.
-
-- tvgen.pl now checks modification times of tvcommon.[ch].
-
-
-** 07-07-98 RELEASE 1.03
-
-- Changed allocation macros to include the return value in deference
-to the C++ new operator.
-
-- Tweaks to make TV_TEST work for more -Dmacro configurations.
-
-- There are still REFCNT problems in the test suite.  Just ignore the
-warnings.  They are harmless.
-
-
-** 03-04-98 RELEASE 1.02
-
-- Fixed an obscure bug in the insertion algorithm.  Tightened
-assertion constraints.
+- Tweaks to improve diagnostics.
 
 
 Copyright © 1997-1998 Joshua Nathaniel Pritikin.  All rights reserved.

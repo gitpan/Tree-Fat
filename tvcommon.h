@@ -258,6 +258,7 @@ STMT_START {					\
 #define TCptv_FORWARD		0x00000002
 #define TCptv_START		0x00000004
 #define TCptv_END		0x00000008
+#define TCptv_DEBUGSEEK		0x00000010
 #define TcMATCH(tc)		(TcFLAGS(tc) & TCptv_MATCH)
 #define TcMATCH_on(tc)		(TcFLAGS(tc) |= TCptv_MATCH, \
 				 TcFLAGS(tc) &= ~(TCptv_START|TCptv_END))
@@ -271,6 +272,7 @@ STMT_START {					\
 #define TcEND(tc)		(TcFLAGS(tc) & TCptv_END)
 #define TcEND_on(tc)		(TcFLAGS(tc) |= TCptv_END)
 #define TcSTARTEND_off(tc)	(TcFLAGS(tc) &= ~(TCptv_START|TCptv_END))
+#define TcDEBUGSEEK(tc)		(TcFLAGS(tc) & TCptv_DEBUGSEEK)
 
 #ifdef TV_DEBUG
 #define DEBUG_step(a)   if (tv_debug & 1)  a

@@ -1,3 +1,27 @@
+** 07-11-98 RELEASE 1.04
+
+- Fixed minor hiccups noticed by cpan-testers.
+
+- tvgen.pl now checks modification times of tvcommon.[ch].
+
+
+** 07-07-98 RELEASE 1.03
+
+- Changed allocation macros to include the return value in deference
+to the C++ new operator.
+
+- Tweaks to make TV_TEST work for more -Dmacro configurations.
+
+- There are still REFCNT problems in the test suite.  Just ignore the
+warnings.  They are harmless.
+
+
+** 03-04-98 RELEASE 1.02
+
+- Fixed an obscure bug in the insertion algorithm.  Tightened
+assertion constraints.
+
+
 ** 02-21-98 RELEASE 1.01
 
 - Hide tv_testmalloc unless TV_TEST is defined.

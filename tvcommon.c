@@ -172,6 +172,7 @@ tc_pos(XPVTC *tc)
     return TcPOS(tc)+1;
   } else {
     TV_PANIC("TV: attempt to get the position of an unpositioned cursor");
+    return 0;
   }
 }
 

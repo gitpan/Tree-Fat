@@ -13,6 +13,6 @@
 #define TnDATA_T		SV*
 #define TV_PLANT_DAT(d)		*d = newSVsv(*d)
 #define TV_UPROOT_DAT(d)	SvREFCNT_dec(d)
-#define TV_DAT_2STRING(d)	SvPV(d, na)
+#define TV_DAT_2STRING(d)	SvPV(d, PL_na)
 
 #include "tv.public"

@@ -30,14 +30,15 @@ static void
 tn_dump(TN *tn, int tcslot, int level)
 {
   char indent[200];
+  char tmpbuf[64]; /* use this in TV_DAT_2STRING if you need it */
   if (level > 190) return;
   {
     int xa;
     for (xa=0; xa < level; xa++) indent[xa] = ' ';
     indent[xa]=0;
   }
-  printf("%sTN(0x%p) [%d/%d] depth=%d tree=%d", 
-	 indent, tn, TnFILL(tn), TnWIDTH, TnDEPTH(tn), TnTREEFILL(tn));
+  printf("%sTN(0x%p) start=%d [%d/%d] depth=%d tree=%d", 
+	 indent, tn, TnSTART(tn), TnFILL(tn), TnWIDTH, TnDEPTH(tn), TnTREEFILL(tn));
   if (tcslot >= -1) printf(" slot=%d", tcslot);
   printf("\n");
   {

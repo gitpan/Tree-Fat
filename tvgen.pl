@@ -38,24 +38,30 @@ my %sym; {
 	    $sym{$s} = "$opt{p}$s";
 	}
     }
-    $sym{'tv\.seek'} = "$opt{p}tvseek.ch";
+    $sym{'tv\.seek'} = "$opt{p}tvseek.h";
     $sym{'tv\.public'} = "$opt{p}tvpub.h";
 }
 
 my $conf_h = "./$opt{p}tv.tmpl";
 my %fmap = (
 	    "$LIB/tv.code"    => "$opt{p}tv.c",
-	    "$LIB/tv.seek"    => "$opt{p}tvseek.ch",
+	    "$LIB/tv.seek"    => "$opt{p}tvseek.h",
 	    "$LIB/tv.private" => "$opt{p}tvpriv.h",
 	    "$LIB/tv.public"  => "$opt{p}tvpub.h",
 	    $conf_h => "$opt{p}tv.h",
 	   );
-for my $f (qw(tvcommon.c tvcommon.h tvcommon0.h)) {
+for my $f (qw(tvcommon.c tvcommon.h)) {
     if (!-e $f or (stat("$LIB/$f"))[9] > (stat($f))[9]) {
-	my $c = "cp $LIB/$f $f";
+	my $c = "cp -f $LIB/$f $f";
 	print "$c\n";
 	system($c)==0 or die "$c: $!";
     }
+}
+if (!-e 'tvcommon0.h') {
+    my $c = "cp -i $LIB/tvcommon0.h tvcommon0.h";
+    print "$c\n";
+    system($c);
+    chmod 0666, 'tvcommon0.h';
 }
 if (!-e $conf_h) {
     print "cp -i $LIB/tv.setup $conf_h\n";

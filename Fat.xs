@@ -45,7 +45,7 @@ XPVTV::FETCH(key)
 	SV **out;
 	CODE:
 	tc_refocus(tv_global, THIS);
-	RETVAL = &sv_undef;
+	RETVAL = &PL_sv_undef;
 	if (tietc_seek(tv_global, key, Unique)) {
 	  key = tietc_fetch(tv_global, &out);
 	  RETVAL = *out;
@@ -168,7 +168,7 @@ XPVTV::unshift(val)
 	CODE:
 	tc_refocus(tc, THIS);
 	tc_moveto(tc,-1);
-	tietc_insert(tc, SvPV(val,na), &val);
+	tietc_insert(tc, SvPV(val,PL_na), &val);
 	tc_refocus(tc, 0);
 
 void
@@ -179,7 +179,7 @@ XPVTV::push(val)
 	CODE:
 	tc_refocus(tc, THIS);
 	tc_moveto(tc, 1<<30);
-	tietc_insert(tc, SvPV(val,na), &val);
+	tietc_insert(tc, SvPV(val,PL_na), &val);
 	tc_refocus(tc, 0);
 
 void
@@ -305,7 +305,7 @@ XPVTC::moveto(...)
 	  where = ST(1);
 	  if (SvNIOK(where)) { xto = SvIV(where); }
 	  else if (SvPOK(where)) {
-	    char *wh = SvPV(where, na);
+	    char *wh = SvPV(where, PL_na);
 	    if (strEQ(wh, "start")) xto=-1;
 	    else if (strEQ(wh, "end")) {
 	      XPVTV *tv = TcTV(THIS);

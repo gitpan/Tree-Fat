@@ -5,13 +5,16 @@ Finds the first element (left to right) equal to the search key.
 
 Use these macros to declare your own seek method:
 
-  TV_ESEEK_FDECL
-  TV_ESEEK_LDECL
-  TV_ESEEK_SETUP
-  TV_ESEEK_CMP(cmp, key, dat);
+  TC_SEEK_FDECL
+  TC_SEEK_LDECL
+  TC_SEEK_SETUP
+  TC_SEEK_CMP(cmp, key, dat);
 
 Obviously, it would be impolite to change any variable names or
 calling convensions below.  These changes will be minimized.
+
+Also see:
+  TC_SEEK_DEBUG
 */
 
 #ifndef TC_SEEK_BREAKEVEN
@@ -28,7 +31,6 @@ TC_SEEK_FDECL
   TC_SEEK_LDECL
   /*  int unique = 0; /**/
 
-    /*  warn("seek '%s'", key);/**/
   assert(tc);
   assert(TC_SEEK_BREAKEVEN >= 4);
   tc_reset(tc);
@@ -88,12 +90,16 @@ TC_SEEK_FDECL
     int xm;
 
   DIVIDE:
-    /*    warn("between %d and %d", xl, xr);/**/
     xm = xl + xw/2;
+#ifdef TC_SEEK_DEBUG
+    if (TcDEBUGSEEK(tc)) warn("between %d and %d; xm=%d", xl, xr, xm);
+#endif
     TC_SEEK_CMP(cmp, TnKEY(tn,xm), TnDAT(tn,xm));
     TcRSTAT(tc, TCS_KEYCMP, 1);
 
-    /*    warn("cmp = %d", cmp);/**/
+#ifdef TC_SEEK_DEBUG
+    if (TcDEBUGSEEK(tc)) warn("cmp = %d", cmp);
+#endif
     if (unique && cmp == 0) {
       TcSLOT(tc) = xm - TnSTART(tn);
       TcPOS(tc) += TcSLOT(tc);
@@ -112,7 +118,9 @@ TC_SEEK_FDECL
       TC_SEEK_CMP(cmp, TnKEY(tn,xm), TnDAT(tn,xm));
       TcRSTAT(tc, TCS_KEYCMP, 1);
 
-      /*      warn("cmp[%d] = %d", xm, cmp);/**/
+#ifdef TC_SEEK_DEBUG
+      if (TcDEBUGSEEK(tc)) warn("cmp[%d] = %d", xm, cmp);
+#endif
       if (cmp == 0) {
 	TcSLOT(tc) = xm - TnSTART(tn);
 	TcPOS(tc) += TcSLOT(tc);
@@ -124,7 +132,9 @@ TC_SEEK_FDECL
 	goto DONE;
       }
     }
-    /*    warn("leftmatch = %d", leftmatch);/**/
+#ifdef TC_SEEK_DEBUG
+    if (TcDEBUGSEEK(tc)) warn("leftmatch = %d", leftmatch);
+#endif
     assert(cmp > 0);
     if (leftmatch) {
       TcPOS(tc) += TnFILL(tn);
