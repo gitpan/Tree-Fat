@@ -1,13 +1,17 @@
+.psrc
 CHANGES
 Fat.pm
 Fat.xs
 MANIFEST
+MANIFEST.SKIP
 Makefile.PL
 README
 TODO
 cmp.pl
+hv.t
 old/tv.private.005
 old/tv.seek.005
+pl/benchmark.t
 rotations.txt
 setup/tv.prod
 setup/tv.test
@@ -20,8 +24,6 @@ t/0insert.t
 t/0moveto.t
 t/0null.t
 t/0seek.t
-t/benchmark.t
-hv.t
 t/test.pm
 tietv.tmpl
 tv.code
@@ -34,4 +36,3 @@ tvcommon.c
 tvcommon.h
 tvgen.pl
 typemap
-.psrc

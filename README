@@ -22,6 +22,13 @@ preserving the functional abstraction.
 Get it via http://www.perl.com/CPAN/authors/id/JPRIT/ !
 
 
+** 07-11-98 RELEASE 1.04
+
+- Fixed minor hiccups noticed by cpan-testers.
+
+- tvgen.pl now checks modification times of tvcommon.[ch].
+
+
 ** 07-07-98 RELEASE 1.03
 
 - Changed allocation macros to include the return value in deference

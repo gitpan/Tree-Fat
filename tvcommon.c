@@ -5,6 +5,7 @@
 #undef MAX
 #define	MAX(a, b)	((a) < (b) ? (b) : (a))
 
+
 #ifdef TV_TEST
 
 #undef assert

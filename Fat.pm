@@ -9,9 +9,9 @@ require AutoLoader;
 
 @ISA = qw(Exporter DynaLoader);
 @EXPORT = qw();
-$VERSION = '1.03';
+$VERSION = '1.04';
 
-bootstrap Tree::Fat $VERSION;
+'Tree::Fat'->bootstrap($VERSION);
 
 sub TIEHASH {
     bless Tree::Fat->new(), shift;

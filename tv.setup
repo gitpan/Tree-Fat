@@ -19,13 +19,7 @@ use the prefix'd names.
 
 
 /* You should not call these directly. */
-#define NEW_TN(near)		tvmalloc(sizeof(TN))
-#define NEW_TCE(near,xx)	tvmalloc(sizeof(TCE)*xx)
-#define FREE_TN(tn)		free(tn)
-#define FREE_TCE(tce)		free(tce)
-
-#define FREE_XPVTV(tv)		free(tv)
-#define FREE_XPVTC(tc)		free(tc)
+#define NEW_TN(ret, near)	tvmalloc(sizeof(TN))
 
 #define TnDATA_T		/* SV* */
 #define TV_PLANT_DAT(d)		/* *d = newSVsv(*d) */

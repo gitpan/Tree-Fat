@@ -51,8 +51,8 @@ my %fmap = (
 	    $conf_h => "$opt{p}tv.h",
 	   );
 for my $f (qw(tvcommon.c tvcommon.h tvcommon0.h)) {
-    if (!-e $f) {
-	my $c = "cp -i $LIB/$f $f";
+    if (!-e $f or (stat("$LIB/$f"))[9] > (stat($f))[9]) {
+	my $c = "cp $LIB/$f $f";
 	print "$c\n";
 	system($c)==0 or die "$c: $!";
     }

@@ -1,5 +1,5 @@
 use Test;  #-*-perl-*-
-BEGIN { plan test => 10 }
+BEGIN { plan test => 16 }
 
 use strict;
 use Tree::Fat;
@@ -29,7 +29,7 @@ sub seek_test {
 	if ($sortall[$t] eq 'zz') {
 	    die $t if $c->fetch() || $c->pos() != ($o->stats())[0];
 	} else {
-	    if (($c->fetch())[1] ne $sortall[$t+1]) {
+	    if ((($c->fetch())[1] || 'false') ne ($sortall[$t+1] or 'false')) {
 		warn $c->fetch();
 		warn $sortall[$t+1];
 		die $t;
