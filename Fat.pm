@@ -9,7 +9,7 @@ require AutoLoader;
 
 @ISA = qw(Exporter DynaLoader);
 @EXPORT = qw();
-$VERSION = '0.09';
+$VERSION = '1.00';
 
 bootstrap Tree::Fat $VERSION;
 
@@ -35,13 +35,6 @@ __END__
 Tree::Fat - Perl Extension to Implement Fat-Node Trees
 
 =head1 SYNOPSIS
-
-  use Tree::Fat
-
-  my $t = Tree::Fat->new_hash;
-  $t->{'key'} = 'value';
-
-or
 
   1. tvgen.pl -p PREFIX
 
@@ -76,6 +69,11 @@ F-Trees without the work, then check out the C<ObjStore> extension by
 the same author.  F-Trees are already integrated into the ObjectStore
 database, right now!)
 
+=head1 WHAT THIS MODULE IS NOT
+
+This is not a plug-and-play perl extension.  This module is designed
+for embedding (and there is no default embedding).
+
 =head1 CURSOR BEHAVIOR
 
 The only way to access a tree is via a cursor.  Cursors behavior is
@@ -102,9 +100,8 @@ instance of 'c': (a,b,*c,c,c,d,e).
 =head1 EMBEDDING API
 
 Flexibility is paramount.  The embedding API is much more flexible
-than would be possible with C++ templates.
-
-XXX
+than would be possible with C++ templates.  See C<tvcommon.*> &
+C<tv.*>.
 
 =head1 PERFORMANCE
 
@@ -188,9 +185,7 @@ Get it via http://www.perl.com/CPAN/authors/id/JPRIT/ !
 
 =head1 DIRECTION
 
-More perl glue in the form of tied arrays and multikey indices.
-
-Embedding documentation.
+More documentation.
 
 =head1 AUTHOR
 

@@ -1,3 +1,19 @@
+** 01-23-98 RELEASE 0.07
+
+- Factored out code that isn't sensitive to key/data layout.
+Unfortunately, this change necessitated tweaking the memory layout.
+
+- tc_insert has much better overall performance.  tc_seek now does a
+full binary search.  tc_delete is re-implemented with rotations.
+Asymptotic performance is now respectable.
+
+- tv_compress, tv_balance added.
+
+- memmove & memcpy of slots used throughout (instead of assignment).
+Added more hooks for C++.  Fixed cpp (re)directives.
+
+
+** EARLIER RELEASES
 
 - Purified.
 

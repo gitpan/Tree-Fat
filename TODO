@@ -1,5 +1,3 @@
-perl REFCNTS!
-
 tvgen.pl
   copy tvcommon.[ch] only if newer
 
@@ -11,9 +9,7 @@ allow treefill/depth updates to be switched off temporarily?
 
 optimized arrays ops: tc_splice(...) !!
 
-bigger torture test
-
-perl interface
+perl interface -> separate extension
   REFCNT!
   push/unshift & pop/shift flags
   transient hash-ref indices?
@@ -24,8 +20,6 @@ OPTIMIZE!
 
 tc_delete
   try 2-level rotations?
-
-compile option for dynamically sized node arrays?
 
 for t in ./t/0*; do echo $t; perl -Mblib -w $t; done
 
