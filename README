@@ -22,21 +22,27 @@ preserving the functional abstraction.
 Get it via http://www.perl.com/CPAN/authors/id/JPRIT/ !
 
 
-** 11-04-98 RELEASE 1.05
+** 03-09-99 RELEASE 1.11
 
-- Tweaks for MIN_PERL_DEFINE.
-
-- Renamed tvseek.ch -> tvseek.h to avoid confusing dumb compilers.
-
-- Switched tvgen.pl to use 'cp -f'.
+- Repaired for 5.005_56.  Malloc/free are now used consistently.
 
 
-** 07-11-98 RELEASE 1.04
+** 01-05-99 RELEASE 1.1
 
-- Tweaks to improve diagnostics.
+- Option to cache first and last key of each tree node.  Seek can use
+these to avoid touching actual records (if they happen to be in slow
+memory).
+
+- Added comments to MANIFEST (before I forget everything! :).
+
+- Some macros are renamed or simplified.
+
+- Declare lots of variables 'register' just in case it matters.
+
+- Ran with Insure++.  Didn't find much.
 
 
-Copyright © 1997-1998 Joshua Nathaniel Pritikin.  All rights reserved.
+Copyright © 1997-1999 Joshua Nathaniel Pritikin.  All rights reserved.
 
 This package is free software and is provided "as is" without express
 or implied warranty.  It may be used, redistributed and/or modified

@@ -1,5 +1,11 @@
 #include "tietv.h"
 
+#ifdef USING_TV_ARG
+# define MYOBJ_ 0,
+#else
+# define MYOBJ_
+#endif
+
 XPVTC *tv_global;
 static int Unique=1;
 
@@ -61,7 +67,7 @@ XPVTV::insert(key, data)
 	CODE:
 	tc_refocus(tv_global, THIS);
 	tietc_seek(tv_global, key, Unique);
-	tietc_insert(tv_global, key, &data);
+	tietc_insert(MYOBJ_ tv_global, key, &data);
 	tc_refocus(tv_global, 0);
 
 void
@@ -73,9 +79,9 @@ XPVTV::STORE(key, val)
 	CODE:
 	tc_refocus(tc,THIS);
 	if (tietc_seek(tc,key, Unique)) {
-	  tietc_store(tc,&val);
+	  tietc_store(MYOBJ_ tc,&val);
 	} else {
-	  tietc_insert(tc,key,&val);
+	  tietc_insert(MYOBJ_ tc,key,&val);
 	}
 	tc_refocus(tv_global, 0);
 
@@ -85,7 +91,7 @@ XPVTV::DELETE(key)
 	CODE:
 	tc_refocus(tv_global, THIS);
 	tietc_seek(tv_global, key, Unique);
-	tietc_delete(tv_global);
+	tietc_delete(MYOBJ_ tv_global);
 	tc_refocus(tv_global, 0);
 
 int
@@ -93,7 +99,7 @@ XPVTV::compress(margin)
 	int margin
 	CODE:
 	tc_refocus(tv_global, THIS);
-	RETVAL = tietv_compress(tv_global, margin);
+	RETVAL = tietv_compress(MYOBJ_ tv_global, margin);
 	tc_refocus(tv_global, 0);
 	OUTPUT:
 	RETVAL
@@ -164,22 +170,24 @@ void
 XPVTV::unshift(val)
 	SV *val
 	PREINIT:
+	STRLEN n_a;
 	XPVTC *tc = tv_global;
 	CODE:
 	tc_refocus(tc, THIS);
 	tc_moveto(tc,-1);
-	tietc_insert(tc, SvPV(val,PL_na), &val);
+	tietc_insert(MYOBJ_ tc, SvPV(val,n_a), &val);
 	tc_refocus(tc, 0);
 
 void
 XPVTV::push(val)
 	SV *val
 	PREINIT:
+	STRLEN n_a;
 	XPVTC *tc = tv_global;
 	CODE:
 	tc_refocus(tc, THIS);
 	tc_moveto(tc, 1<<30);
-	tietc_insert(tc, SvPV(val,PL_na), &val);
+	tietc_insert(MYOBJ_ tc, SvPV(val,n_a), &val);
 	tc_refocus(tc, 0);
 
 void
@@ -283,19 +291,20 @@ XPVTC::focus()
 void
 XPVTC::delete()
 	CODE:
-	tietc_delete(THIS);
+	tietc_delete(MYOBJ_ THIS);
 
 void
 XPVTC::insert(key, data)
 	char *key
 	SV *data
 	CODE:
-	tietc_insert(THIS, key, &data);
+	tietc_insert(MYOBJ_ THIS, key, &data);
 
 void
 XPVTC::moveto(...)
 	PROTOTYPE: $;$
 	PREINIT:
+	STRLEN n_a;
 	SV *where;
 	I32 xto=-2;
 	CODE:
@@ -305,7 +314,7 @@ XPVTC::moveto(...)
 	  where = ST(1);
 	  if (SvNIOK(where)) { xto = SvIV(where); }
 	  else if (SvPOK(where)) {
-	    char *wh = SvPV(where, PL_na);
+	    char *wh = SvPV(where, n_a);
 	    if (strEQ(wh, "start")) xto=-1;
 	    else if (strEQ(wh, "end")) {
 	      XPVTV *tv = TcTV(THIS);
@@ -368,7 +377,7 @@ void
 XPVTC::store(data)
 	SV *data
 	CODE:
-	tietc_store(THIS, &data);
+	tietc_store(MYOBJ_ THIS, &data);
 
 void
 XPVTC::dump()

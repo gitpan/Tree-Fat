@@ -4,16 +4,16 @@
 #include "tvcommon0.h"
 
 #ifdef TV_TEST
-#ifndef TV_DUMP
-#define TV_DUMP
-#endif
-#ifndef TV_DEBUG
-#define TV_DEBUG
-#endif
+# ifndef TV_DUMP
+#  define TV_DUMP
+# endif
+# ifndef TV_DEBUG
+#  define TV_DEBUG
+# endif
 #endif
 
 #ifndef dTYPESPEC
-#define dTYPESPEC(t)
+# define dTYPESPEC(t)
 #endif
 
 struct tn0 {
@@ -69,8 +69,20 @@ typedef struct xpvtc XPVTC;
 
 #define SCOPE	if(1)
 
+#ifndef TV_FREE
+# define TV_FREE(ptr)		TV_PANIC("TV_FREE(%p) unimplemented", ptr);
+#endif
 #ifndef FREE_XPVTV
-#define FREE_XPVTV(tv) TV_PANIC("FREE_XPVTV unavailable")
+# define FREE_XPVTV(tv)		TV_FREE(tv)
+#endif
+#ifndef FREE_XPVTC
+# define FREE_XPVTC(tv)		TV_FREE(tv)
+#endif
+#ifndef FREE_TN
+# define FREE_TN(tv)		TV_FREE(tv)
+#endif
+#ifndef FREE_TCE
+# define FREE_TCE(tv)		TV_FREE(tv)
 #endif
 
 #define TnKID(tn,xx)	((TN0*)((TN0*)tn)->tn_kids[xx])
@@ -96,18 +108,6 @@ typedef struct xpvtc XPVTC;
 	      0))))
 	/* DO NOT OPTIMIZE until running through the profiler! */
 
-
-#define TnFREEl(tn,it)						\
-STMT_START {							\
-  assert(it==TnLEFT(tn)); FREE_TN(TnLEFT(tn)); TnLEFT_set(tn,0);	\
-} STMT_END
-#define TnFREEr(tn,it)							\
-STMT_START { 								\
-  assert(it==TnRIGHT(tn)); FREE_TN(TnRIGHT(tn)); TnRIGHT_set(tn,0); 	\
-} STMT_END
-#define TvFREEROOT(tv)						\
-STMT_START { FREE_TN(TvROOT(tv)); TvROOT_set(tv,0); } STMT_END
-
 #define TvEMPTY(tv)		(TvFILL(tv)==0)
 #define TvVERSION(tv)		(tv)->xtv_version
 #define TvFLAGS(tv)		(tv)->xtv_flags
@@ -129,7 +129,7 @@ STMT_START { FREE_TN(TvROOT(tv)); TvROOT_set(tv,0); } STMT_END
 #define TcNOPOS(tc)		((tc)->xtc_pos==-2)
 #define TcFIXDEPTHABOVE(tc, start)		\
 STMT_START {					\
-  int _xa;					\
+  register int _xa;				\
   for (_xa=(start)-1; _xa >= 0; _xa--) {	\
     TN0 *_tn;					\
     assert(_xa < TcFILL(tc));			\
@@ -148,8 +148,8 @@ STMT_START {					\
 
 #define TcPUSH(tc,tn)				\
 STMT_START {					\
-  TCE *_ce;					\
-  TN0 *_topush = (TN0*) (tn);			\
+  register TCE *_ce;				\
+  register TN0 *_topush = (TN0*) (tn);		\
   assert(tc);					\
   assert(_topush);				\
   if (TcFILL(tc)+1 > TcMAX(tc)) tc_extend(tc);	\
@@ -163,7 +163,6 @@ STMT_START {					\
 #define TcTN(tc,xx)		((TN0*)(tc)->xtc_path[xx].tce_tn)
 #define TcTNx(tc)		TcTN(tc,TcFILL(tc)-1)
 #define TcSLOT(tc)		(tc)->tce_slot
-#define TcSLOTx(tc)		(tc)->tce_slot
 #define TcCE(tc,xx)		(&(tc)->xtc_path[xx])
 #define TcCEx(tc)		(&(tc)->xtc_path[TcFILL(tc)-1])
 
@@ -186,7 +185,7 @@ STMT_START {					\
 
 #define TcCUT(tc,at) \
 STMT_START {					\
-  int _xa;					\
+  register int _xa;				\
   for (_xa=(at)+1; _xa < TcFILL(tc); _xa++) {	\
     *TcCE(tc, _xa-1) = *TcCE(tc, _xa);		\
   }						\
@@ -196,7 +195,7 @@ STMT_START {					\
 
 #define TcFLOW(tc) \
 STMT_START {					\
-    TCE *_ce = TcCEx(tc);			\
+    register TCE *_ce = TcCEx(tc);		\
     if (TcFORWARD(tc)) {			\
       CeRIGHT_off(_ce);				\
       CeLEFT_on(_ce);				\
@@ -217,7 +216,7 @@ STMT_START {					\
 #define TcGOFWD(tc) \
 STMT_START {					\
   if (!TcFORWARD(tc)) {				\
-    TCE *_ce = TcCEx(tc);			\
+    register TCE *_ce = TcCEx(tc);		\
     DEBUG_step(warn("going FORWARD"));		\
     if (CeRIGHT(_ce)) {				\
       CeRIGHT_off(_ce);				\
@@ -230,7 +229,7 @@ STMT_START {					\
 #define TcGOBWD(tc) \
 STMT_START {					\
   if (TcFORWARD(tc)) {				\
-    TCE *ce = TcCEx(tc);			\
+    register TCE *ce = TcCEx(tc);		\
     DEBUG_step(warn("going BACKWARD"));		\
     if (CeLEFT(ce)) {				\
       CeLEFT_off(ce);				\
@@ -311,7 +310,7 @@ void tc_adjust_treefill(XPVTC *tc, int delta);
 int tc_stepnode(XPVTC *tc, I32 delta);
 void tn_recalc(XPVTC *tc, TN0 *tn);
 int tc_rotate(XPVTC *tc, int looseness);
-int tc_freetn(XPVTC *tc, XPVTV *tv, TN0 *tn);
+int tc_freetn(XPVTC *tc, XPVTV *tv, TN0 *tn, void(*dtor)(TN0*));
 void tv_recalc(XPVTV *tv);
 void *tv_testmalloc(size_t size);
 /*#define tv_memcpy tv_memmove  /*optimize XXX*/

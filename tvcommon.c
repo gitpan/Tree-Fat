@@ -40,13 +40,13 @@ void *
 tv_testmalloc(size_t size)
 {
   void *ptr;
-  if ((long)size < 0) TV_PANIC("panic: malloc");
-  ptr = malloc(size?size:1);
+  ptr = safemalloc(size);
   if (ptr != 0) {
     memset(ptr, 0x69, size); /* total paranoia */
     return ptr;
   } else {
     TV_PANIC("out of memory!");
+    return 0;
   }
 }
 #endif
@@ -118,7 +118,7 @@ init_tc(XPVTC *tc)
   TcTV(tc) = 0;
   TcFLAGS(tc) = 0;
 #ifdef TV_STATS
-  tc->xtc_stats = (I32*) malloc(sizeof(I32)*TCS_MAX);
+  tc->xtc_stats = (I32*) safemalloc(sizeof(I32)*TCS_MAX); /* XXX */
   SCOPE {
     int xa;
     for (xa=0; xa < TCS_MAX; xa++) {
@@ -140,15 +140,15 @@ free_tc(XPVTC *tc)
   assert(TcPATH(tc));
   FREE_TCE(TcPATH(tc));
 #ifdef TV_STATS
-  free(tc->xtc_stats); /*macroize? XXX*/
+  safefree(tc->xtc_stats); /*macroize XXX*/
 #endif
-  FREE_XPVTC(tc)
+  FREE_XPVTC(tc);
 }
 
 PRIVATE void
 tc_adjust_treefill(XPVTC *tc, int delta)
 {
-  int lx;
+  register int lx;
   assert(tc);
   for (lx=0; lx < TcFILL(tc); lx++) {
     TnTREEFILL(TcTN(tc, lx)) += delta;
@@ -200,8 +200,8 @@ tc_stepnode(XPVTC *tc, I32 delta)
   if (delta > 0) {
     TcGOFWD(tc);
     do {
-      TCE *ce;
-      TN0 *down;
+      register TCE *ce;
+      register TN0 *down;
     FORWARD:
       TcRSTAT(tc, TCS_STEPNODE, 1);
       ce = TcCEx(tc);
@@ -237,8 +237,8 @@ tc_stepnode(XPVTC *tc, I32 delta)
   else if (delta < 0) {
     TcGOBWD(tc);
     do {
-      TCE *ce;
-      TN0 *down;
+      register TCE *ce;
+      register TN0 *down;
     BACKWARD:
       TcRSTAT(tc, TCS_STEPNODE, 1);
       ce = TcCEx(tc);
@@ -508,7 +508,7 @@ tc_rotate(XPVTC *tc, int looseness)
 }
 
 PRIVATE int
-tc_freetn(XPVTC *tc, XPVTV *tv, TN0 *tn)
+tc_freetn(XPVTC *tc, XPVTV *tv, TN0 *tn, void(*dtor)(TN0*))
 {
   int stepnext=0;
   int left = TnDEPTHx(TnLEFT(tn));
@@ -538,17 +538,25 @@ tc_freetn(XPVTC *tc, XPVTV *tv, TN0 *tn)
     TCE *ce = TcCEx(tc);
     TN0 *mom = CeTN(ce);
     if (TnLEFT(mom) == tn) {
-      TnFREEl(mom, tn);
+      (*dtor)(tn);
+      FREE_TN(tn);
+      TnLEFT_set(mom,0);
       TcSLOT(tc) = 0;
     } else {
-      TnFREEr(mom, tn);
+      assert(tn == TnRIGHT(mom));
+      (*dtor)(tn);
+      FREE_TN(tn);
+      TnRIGHT_set(mom,0);
       TcSLOT(tc) = TnFILL(mom)-1;
       ++stepnext;
     }
     tn_recalc(tc,mom);
     TcFIXDEPTHABOVE(tc, TcFILL(tc)-1);
   } else {
-    TvFREEROOT(tv);
+    assert(TvROOT(tv) == tn);
+    (*dtor)(tn);
+    FREE_TN(tn);
+    TvROOT_set(tv,0);
     --TcPOS(tc);
     TcMATCH_off(tc);
     TcSTART_on(tc);
@@ -588,9 +596,8 @@ tc_moveto(XPVTC *tc, I32 xto)
   XPVTV *tv;
   TCE *ce;
   TN0 *tn, *down;
-  int xa;
-  int cur;
-  int tree;
+  register int cur;
+  register int tree;
 
   assert(tc);
   tv=TcTV(tc);
@@ -810,7 +817,7 @@ tc_getstat(XPVTC *tc, int xx, I32 *val)
 
 
 /*
-Copyright © 1997-1998 Joshua Nathaniel Pritikin.  All rights reserved.
+Copyright © 1997-1999 Joshua Nathaniel Pritikin.  All rights reserved.
 
 This package is free software and is provided "as is" without express
 or implied warranty.  It may be used, redistributed and/or modified

@@ -9,7 +9,7 @@ require AutoLoader;
 
 @ISA = qw(Exporter DynaLoader);
 @EXPORT = qw();
-$VERSION = '1.05';
+$VERSION = '1.11';
 
 'Tree::Fat'->bootstrap($VERSION);
 
@@ -36,6 +36,9 @@ Tree::Fat - Perl Extension to Implement Fat-Node Trees
 
 =head1 SYNOPSIS
 
+This is not a plug-and-play perl extension.  This module is designed
+for embedding (and there is no default embedding).
+
   1. tvgen.pl -p PREFIX
 
   2. Edit PREFIXtv.tmpl
@@ -46,7 +49,7 @@ Tree::Fat - Perl Extension to Implement Fat-Node Trees
 
 Implements object-oriented trees using algorithms adapted from b-trees
 and AVL trees (without resorting to yucky C++).  Fat-node trees are
-not the best for many niche applications, but they do have excellent
+not the best for many niche applications but they do have excellent
 all-terrain performance.
 
  TYPE       Speed       Flexibility  Scales     Memory   Keeps-Order
@@ -57,10 +60,10 @@ all-terrain performance.
 
 =head1 WHAT IS A FAT-TREE?
 
-It's a cross between a tree and an array!  Each tree node contains a
+It's a cross between a tree and an array.  Each tree node contains a
 fixed length array of slots.  Tree performance is enhanced by
-balancing array operations with tree operations.  Tree operations are
-better optimized by taking the arrays into account.
+balancing array operations with tree operations.  Moreover, tree
+operations are better optimized by taking the arrays into account.
 
 =head1 HOW ABOUT PERSISTANCE?
 
@@ -69,17 +72,12 @@ F-Trees without the work, then check out the C<ObjStore> extension by
 the same author.  F-Trees are already integrated into the ObjectStore
 database, right now!)
 
-=head1 WHAT THIS MODULE IS NOT
-
-This is not a plug-and-play perl extension.  This module is designed
-for embedding (and there is no default embedding).
-
 =head1 CURSOR BEHAVIOR
 
 The only way to access a tree is via a cursor.  Cursors behavior is
 derived from the principle of least-surprise (rather than greatest
-efficiency).  More documentation doesn't exist.  Read the source code
-for more information.
+efficiency).  More documentation there isn't.  Please read the source
+code for more information.
 
 =over 4
 
@@ -193,7 +191,7 @@ More documentation.
 
 =head1 AUTHOR
 
-Copyright © 1997-1998 Joshua Nathaniel Pritikin.  All rights reserved.
+Copyright © 1997-1999 Joshua Nathaniel Pritikin.  All rights reserved.
 
 This package is free software and is provided "as is" without express
 or implied warranty.  It may be used, redistributed and/or modified

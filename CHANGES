@@ -1,4 +1,15 @@
+** 11-04-98 RELEASE 1.05
+
+- Tweaks for MIN_PERL_DEFINE.
+
+- Renamed tvseek.ch -> tvseek.h to avoid confusing dumb compilers.
+
+- Switched tvgen.pl to use 'cp -f'.
+
+
 ** 07-11-98 RELEASE 1.04
+
+- Tweaks to improve diagnostics.
 
 - Fixed minor hiccups noticed by cpan-testers.
 

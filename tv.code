@@ -26,8 +26,7 @@ if (!(what)) { 						\
 
 #ifdef TV_DUMP
 
-static void
-tn_dump(TN *tn, int tcslot, int level)
+static void tn_dump(TN *tn, int tcslot, int level)
 {
   char indent[200];
   char tmpbuf[64]; /* use this in TV_DAT_2STRING if you need it */
@@ -83,8 +82,7 @@ tn_dump(TN *tn, int tcslot, int level)
   }
 }
 
-void
-tv_dump(XPVTV *tv)
+void tv_dump(XPVTV *tv)
 {
   if (!tv) return;
   printf("TV(0x%p) [%d/%d]\n", tv, TvFILL(tv), TvMAX(tv));
@@ -93,8 +91,7 @@ tv_dump(XPVTV *tv)
   tn_dump(TvROOT(tv), -2, 1);
 }
 
-void
-tc_dump(XPVTC *tc)
+void tc_dump(XPVTC *tc)
 {
   XPVTV *tv;
   int xa;
@@ -122,8 +119,7 @@ static int tn_treefill(TN *tn, int depth, int *maxdepth);
 #if defined(TV_TEST)
 
 #if defined(TV_KEYD)
-static int
-tn_findkey(TN *tn, I32 *at, TnKEY_T key)
+static int tn_findkey(TN *tn, I32 *at, TnKEY_T key)
 {
   TN *down;
   int xa;
@@ -143,8 +139,7 @@ tn_findkey(TN *tn, I32 *at, TnKEY_T key)
 
 /********************** ATTEMPT TO RECONCILE ALL OVERLAPPING INFORMATION */
 
-static int
-tn_emptied(TN *tn)
+static int tn_emptied(TN *tn)
 {
   int xa;
 #ifdef TV_KEYD
@@ -155,8 +150,7 @@ tn_emptied(TN *tn)
   return 1;
 }
 
-static int
-tn_happy0(TN *tn)
+static int tn_happy0(TN *tn)
 {
   int xa;
   if (!(TnSTART(tn) >= 0 && TnSTART(tn) <= TnEND(tn))) {
@@ -203,11 +197,32 @@ tn_happy0(TN *tn)
     }
   }
 #endif
+#if defined(TV_KEYCACHE)
+  if (!TnFILL(tn)) {
+    int xx;
+    for (xx=0; xx <= 1; xx++) {
+      if (!TnKCACHE(tn,xx)) continue;
+      warn("TN(%p): kcache[%d] not invalid", tn, xx);
+      return 0;
+    }
+  } else {
+    int cmp;
+    TV_KEYCMP(cmp, TnKCACHE(tn,0), TnKEY(tn,TnSTART(tn)));
+    if (cmp != 0) {
+      warn("TN(%p): kcache[0] stale", tn);
+      return 0;
+    }
+    TV_KEYCMP(cmp, TnKCACHE(tn,1), TnKEY(tn,TnLAST(tn)));
+    if (cmp != 0) {
+      warn("TN(%p): kcache[0] stale", tn);
+      return 0;
+    }
+  }
+#endif
   return 1;
 }
 
-static int
-tn_happy(TN *tn, U32 scanid)
+static int tn_happy(TN *tn, U32 scanid)
 {
   int depth;
   int treefill;
@@ -239,8 +254,7 @@ tn_happy(TN *tn, U32 scanid)
   return 1;
 }
 
-static int
-tv_happy(XPVTV *tv)
+static int tv_happy(XPVTV *tv)
 {
   static U32 scanid = 42;
   TN *root = TvROOT(tv);
@@ -260,8 +274,7 @@ tv_happy(XPVTV *tv)
   return 1;
 }
 
-static I32
-tc_calcpos(XPVTC *tc)
+static I32 tc_calcpos(XPVTC *tc)
 {
   XPVTV *tv;
   int xa;
@@ -303,8 +316,7 @@ tc_calcpos(XPVTC *tc)
 }
 
 /* try to order from general to specific; avoid grouping tests */
-static int
-tc_happy(XPVTC *tc)
+static int tc_happy(XPVTC *tc)
 {
   XPVTV *tv;
   int xa;
@@ -473,7 +485,7 @@ tc_happy(XPVTC *tc)
   /* does TcPOS match cursor? */
   if (TcFILL(tc) && TcMATCH(tc) && !TcNOPOS(tc)) {
     I32 pos=0;
-    int slot = TcSLOTx(tc);
+    int slot = TcSLOT(tc);
     if (!TcMATCH(tc)) {
       if (slot == -1) slot++;
       if (slot == TnFILL(TcTNx(tc))) slot--;
@@ -491,10 +503,9 @@ tc_happy(XPVTC *tc)
 }
 
 #ifdef TV_KEYD
-static int
-tc_atkey(XPVTC *tc, char *key)
+static int tc_atkey(XPVTC *tc, char *key)
 {
-  if (strNE(TnKEYx(TcTNx(tc),TcSLOTx(tc)), key)) {
+  if (strNE(TnKEYx(TcTNx(tc),TcSLOT(tc)), key)) {
     tc_dump(tc);
     warn("cursor not pointing to inserted element '%s'", key);
     return 0;
@@ -503,8 +514,7 @@ tc_atkey(XPVTC *tc, char *key)
 }
 #endif
 
-static int
-tn_treefill(TN *tn, int depth, int *maxdepth)
+static int tn_treefill(TN *tn, int depth, int *maxdepth)
 {
   TN *down;
   int xa;
@@ -526,24 +536,30 @@ tn_treefill(TN *tn, int depth, int *maxdepth)
 /* CCov: on */
 /* CCov: jump TV_PANIC END_SCOPE */
 
-void
-free_tv(XPVTV *tv)
+void free_tv(XPVTV *tv)
 {
   assert(tv);
   tv_clear(tv);
-  FREE_XPVTV(tv)
+  FREE_XPVTV(tv);
 }
 
-static void
-tn_lxfer(XPVTC *tc, TN *n1, TN *n2, int sz)
+static void tn_dtor(TN0 *tn0)
+{
+  /* unnecessary in C++ XXX */
+  TN *tn = (TN*) tn0;
+  TV_KCACHE_CLEAR(TnKCACHE(tn, 0));
+  TV_KCACHE_CLEAR(TnKCACHE(tn, 1));
+}
+
+static void tn_lxfer(TV_ARG_ XPVTC *tc, TN *n1, TN *n2, int sz)
 {
   assert(TnFILL(n1) + sz <= TnWIDTH);
   if (TnWIDTH - TnEND(n1) < sz) {
-    int start = (TnWIDTH - (TnFILL(n1)+sz))/2;
-    int delta = TnSTART(n1) - start;
-    int xa;
+    register int delta = TnSTART(n1) - (TnWIDTH - (TnFILL(n1)+sz))/2;
+    register int xa;
+    register int yes;
     assert(delta > 0);
-    TnSHIFTl(n1, TnSTART(n1), TnLAST(n1), delta);
+    TnSHIFTl(n1, TnSTART(n1), TnLAST(n1), delta, yes);
     TnSTART(n1) -= delta;
     TnEND(n1) -= delta;
     for (xa=0; xa < delta; xa++) {
@@ -554,17 +570,43 @@ tn_lxfer(XPVTC *tc, TN *n1, TN *n2, int sz)
   TnCOPYRANGE(n2,TnSTART(n2),n1,TnEND(n1),sz);
   TnEND(n1) += sz;
   TnSHIFT(n2, sz);
+  TV_KCACHE_LOADr(n1);
+  if (TnFILL(n2))
+    TV_KCACHE_LOADl(n2);
 }
 
-/* n1 and n2 must be adjacent */
-static void
-tn_xfer(XPVTC *tc, TN *n1, TN *n2, int sz)
+static void tn_rxfer(TV_ARG_ XPVTC *tc, TN *n1, TN *n2, int sz)
+{
+  assert(TnFILL(n2) + sz <= TnWIDTH);
+  if (TnSTART(n2) < sz) {
+    register int delta = sz + (TnWIDTH - (TnFILL(n2)+sz))/2 - TnSTART(n2);
+    register int xa;
+    register int yes;
+    assert(delta > 0);
+    TnSHIFTr(n2, TnSTART(n2), TnLAST(n2), delta, yes);
+    TnSTART(n2) += delta;
+    TnEND(n2) += delta;
+    for (xa=0; xa < TnSTART(n2); xa++) {
+      TnCLEARSLOT1(n2,xa);
+      TnCLEARSLOT2(n2,xa);
+    }
+  }
+  TnCOPYRANGE(n1,TnEND(n1)-sz,n2,TnSTART(n2)-sz,sz);
+  TnSTART(n2) -= sz;
+  TnPOP(n1, sz);
+  TV_KCACHE_LOADr(n1);
+  if (TnFILL(n2))
+    TV_KCACHE_LOADl(n2);
+}
+
+/* n1 and n2 are assumed to be adjacent */
+static void tn_xfer(TV_ARG_ XPVTC *tc, TN *n1, TN *n2, int sz)
 {
   assert(sz);
   if (sz < 0) {
     sz = -sz;
     assert(TcTNx(tc) == n2);
-    tn_lxfer(tc, n1, n2, sz);
+    tn_lxfer(TV_THIS_ tc, n1, n2, sz);
     TcSLOT(tc) -= sz;
     if (TcSLOT(tc) < 0) {
       tc_stepnode(tc,-1);
@@ -573,23 +615,7 @@ tn_xfer(XPVTC *tc, TN *n1, TN *n2, int sz)
     }
   } else {
     assert(TcTNx(tc) == n1);
-    assert(TnFILL(n2) + sz <= TnWIDTH);
-    if (TnSTART(n2) < sz) {
-      int start = sz+(TnWIDTH - (TnFILL(n2)+sz))/2;
-      int delta = start - TnSTART(n2);
-      int xa;
-      assert(delta > 0);
-      TnSHIFTr(n2, TnSTART(n2), TnLAST(n2), delta);
-      TnSTART(n2) += delta;
-      TnEND(n2) += delta;
-      for (xa=0; xa < TnSTART(n2); xa++) {
-	TnCLEARSLOT1(n2,xa);
-	TnCLEARSLOT2(n2,xa);
-      }
-    }
-    TnCOPYRANGE(n1,TnEND(n1)-sz,n2,TnSTART(n2)-sz,sz);
-    TnSTART(n2) -= sz;
-    TnPOP(n1, sz);
+    tn_rxfer(TV_THIS_ tc, n1, n2, sz);
     if (TcSLOT(tc) > TnFILL(n1)) {
       tc_stepnode(tc,1);
       assert(TcTNx(tc) == n2);
@@ -606,16 +632,14 @@ tn_xfer(XPVTC *tc, TN *n1, TN *n2, int sz)
 */
 
 #if defined(TV_KEYD)
-void
-tc_insert(XPVTC *tc, TnKEY_T key, TnSTOREDATA_T data)
+void tc_insert(TV_ARG_ XPVTC *tc, TnKEY_T key, TnSTOREDATA_T data)
 #else
-void
-tc_insert(XPVTC *tc, TnSTOREDATA_T data)
+void tc_insert(TV_ARG_ XPVTC *tc, TnSTOREDATA_T data)
 #endif
 {
-  TN *tn;
-  XPVTV *tv;
-  int split=0;
+  register TN *tn;
+  register XPVTV *tv;
+  register int split=0;
   assert(tc);
   TV_PLANT_KEY(key);
   TV_PLANT_DAT(data);
@@ -624,12 +648,13 @@ tc_insert(XPVTC *tc, TnSTOREDATA_T data)
   TcRSTAT(tc, TCS_INSERT, 1);
   assert(tc_happy(tc));
   if (TvEMPTY(tv)) {
-    TCE *ce;
+    register TCE *ce;
     assert(TnWIDTH >= 5);
     NEW_TN(tn, tv);
     TnINIT(tn, 1, 0, 0);
-    TnINITGUARD(tn);
     TnSETSLOT(tn,TnSTART(tn),key,data);
+    TV_KCACHE_LOADl(tn);
+    TV_KCACHE_LOADr(tn);
     TnDEPTH(tn)=TnCALCDEPTH(tn);
     TcRSTAT(tc, TCS_DEPTHCALC, 1);
     TnTREEFILL(tn) = 1;
@@ -644,8 +669,8 @@ tc_insert(XPVTC *tc, TnSTOREDATA_T data)
     TcFORWARD_on(tc);
     TcPOS(tc)=0;
   } else {
-    int slot;
-    int olddir = TcFORWARD(tc) ? 1 : -1;
+    register int olddir = TcFORWARD(tc) ? 1 : -1;
+    register int slot;
     if (!TcMATCH(tc)) {
       /*warn("tc_insert: no match; before step(1)");tc_dump(tc);/**/
       tc_step(tc, 1);/*rewrite XXX*/
@@ -664,21 +689,22 @@ tc_insert(XPVTC *tc, TnSTOREDATA_T data)
        TcSLOT range = (0 .. TnFILL(tn)) */
     slot = TcSLOT(tc);
     if (TnFILL(tn) < TnWIDTH) {
-      int left;
+      register int yes;
+      register int shift_left;
       tc_adjust_treefill(tc, 1);
 
-      left = slot <= TnFILL(tn)/2;
+      shift_left = slot <= TnFILL(tn)/2;
       while (1) {
-	if (left) {
-	  if (TnSTART(tn) == 0) { left = !left; continue; }
-	  TnSHIFTl(tn, TnSTART(tn), TnSTART(tn)+slot-1, 1);
+	if (shift_left) {
+	  if (TnSTART(tn) == 0) { shift_left = !shift_left; continue; }
+	  TnSHIFTl(tn, TnSTART(tn), TnSTART(tn)+slot-1, 1, yes);
 	  --TnSTART(tn);
 	  assert(TnSLOTCLEAR(tn,TnSTART(tn)+slot));
 	  TnCLEARSLOT2(tn, TnSTART(tn)+slot);
 	  break;
 	} else {
-	  if (TnEND(tn) == TnWIDTH) { left = !left; continue; }
-	  TnSHIFTr(tn, TnSTART(tn)+slot, TnLAST(tn), 1);
+	  if (TnEND(tn) == TnWIDTH) { shift_left = !shift_left; continue; }
+	  TnSHIFTr(tn, TnSTART(tn)+slot, TnLAST(tn), 1, yes);
 	  ++TnEND(tn);
 	  assert(TnSLOTCLEAR(tn,TnSTART(tn)+slot));
 	  TnCLEARSLOT2(tn, TnSTART(tn)+slot);
@@ -687,6 +713,11 @@ tc_insert(XPVTC *tc, TnSTOREDATA_T data)
       }
 
       TnSETSLOT(tn,TnSTART(tn)+slot,key,data);
+      if (slot == 0) {
+	TV_KCACHE_LOADl(tn);
+      } else if (TnSTART(tn)+slot == TnLAST(tn)) {
+	TV_KCACHE_LOADr(tn);
+      }
       TcSLOT(tc) = slot;
       assert(tn_happy0(tn));
       goto DONE;
@@ -715,9 +746,9 @@ tc_insert(XPVTC *tc, TnSTOREDATA_T data)
 	  tc_adjust_treefill(tc, -xfer);
 	  total = TnFILL(tn) + TnFILL(n1);
 	  if (dir == -1) {
-	    tn_xfer(tc, n1, tn, -xfer);
+	    tn_xfer(TV_THIS_ tc, n1, tn, -xfer);
 	  } else { 
-	    tn_xfer(tc, tn, n1,  xfer);
+	    tn_xfer(TV_THIS_ tc, tn, n1,  xfer);
 	  }
 	  /* cursor is either at tn or n1, depending on slot */
 	  assert(total == TnFILL(tn) + TnFILL(n1));
@@ -736,18 +767,18 @@ tc_insert(XPVTC *tc, TnSTOREDATA_T data)
       TN *right;
       NEW_TN(right, tn);
       TnINIT(right,0,0,TnRIGHT(tn));
-      TnINITGUARD(right);
       TnRIGHT_set(tn, right);
-      tn_xfer(tc,tn,right,TnWIDTH/2);
+      tn_xfer(TV_THIS_ tc,tn,right,TnWIDTH/2);
+      TV_KCACHE_LOADr(right);
       tn_recalc(tc,(TN0*)right);
       assert(tn_happy0(right));
     } else {
       TN *left;
       NEW_TN(left, tn);
       TnINIT(left,0,TnLEFT(tn),0);
-      TnINITGUARD(left);
       TnLEFT_set(tn, left);
-      tn_xfer(tc,left,tn,-TnWIDTH/2);
+      tn_xfer(TV_THIS_ tc,left,tn,-TnWIDTH/2);
+      TV_KCACHE_LOADl(left);
       tn_recalc(tc,(TN0*)left);
       assert(tn_happy0(left));
     }
@@ -773,13 +804,13 @@ tc_insert(XPVTC *tc, TnSTOREDATA_T data)
   }
 }
 
-void
-tc_delete(XPVTC *tc)
+void tc_delete(TV_ARG_ XPVTC *tc)
 {
   XPVTV *tv;
   TN *tn;
   int slot;
   int stepnext=0;
+  register int yes;
   assert(tc);
   if (!TcMATCH(tc)) return;
   tv=TcTV(tc);
@@ -787,25 +818,30 @@ tc_delete(XPVTC *tc)
   TcRSTAT(tc, TCS_DELETE, 1);
   assert(tc_happy(tc));
   tn = TcTNx(tc);
-  slot = TcSLOTx(tc);
+  slot = TcSLOT(tc);
   TV_UPROOT_KEY(TnKEYx(tn,slot));
-  /* UNSET macro because the slot is probably not being immediately
-     reused or deleted. */
+  /* UNSET since the slot is probably not being immediately reused or freed */
   TV_UNSET_DAT(TnDATx(tn,slot));
   if (slot < TnFILL(tn)/2) {
-    TnSHIFTr(tn, TnSTART(tn), TnSTART(tn)+slot-1, 1);
+    TnSHIFTr(tn, TnSTART(tn), TnSTART(tn)+slot-1, 1, yes);
     TnSHIFT(tn,1);
   } else {
-    TnSHIFTl(tn, TnSTART(tn)+slot+1, TnLAST(tn), 1);
+    TnSHIFTl(tn, TnSTART(tn)+slot+1, TnLAST(tn), 1, yes);
     TnPOP(tn,1);
   }
   tc_adjust_treefill(tc, -1);
   if (TnEMPTY(tn)) {
-    assert(tn_emptied(tn));
-    stepnext = tc_freetn(tc, tv, (TN0*)tn);
+    TcFREETN(tc,tv,tn,tn_dtor,stepnext);
   } else {
-    if (TcSLOTx(tc) == TnFILL(tn)) {
-      --TcSLOTx(tc);
+    if (!yes) {
+      if (slot==0) {
+	TV_KCACHE_LOADl(tn);
+      } else {
+	TV_KCACHE_LOADr(tn);
+      }
+    }
+    if (TcSLOT(tc) == TnFILL(tn)) {
+      --TcSLOT(tc);
       ++stepnext;
     }
   }
@@ -824,8 +860,7 @@ tc_delete(XPVTC *tc)
   This could be smarter.  How about looking at the 3 or 5 sequential nodes
   and doing something fancy?
  */
-int
-tv_compress(XPVTC *tc, int margin)
+int tv_compress(TV_ARG_ XPVTC *tc, int margin)
 {
   int freed=0;
   TN *prev;
@@ -844,12 +879,11 @@ tv_compress(XPVTC *tc, int margin)
     avail = TnWIDTH - margin - TnFILL(prev);
     if (avail > 0) {
       int tomove = MIN(avail, TnFILL(at));
-      tn_lxfer(tc, prev, at, tomove);
+      tn_lxfer(TV_THIS_ tc, prev, at, tomove);
 
       if (TnEMPTY(at)) {
 	int stepnext;
-	assert(tn_emptied(at));
-	stepnext = tc_freetn(tc, tv, (TN0*)at);
+	TcFREETN(tc,tv,at,tn_dtor,stepnext);
 	freed += TnWIDTH;
 	if (stepnext) {
 	  assert(TcTNx(tc) == prev);
@@ -867,10 +901,10 @@ tv_compress(XPVTC *tc, int margin)
   return freed;
 }
 
-static void
-tn_clear(TN *tn)
+static void tn_clear(TN *tn)
 {
-  int xa;
+  register TN *kid;
+  register int xa;
   assert(tn);
   for (xa=0; xa < TnFILL(tn); xa++) {
     int slot = TnSTART(tn) + xa;
@@ -879,23 +913,31 @@ tn_clear(TN *tn)
     TnCLEARSLOT1(tn,slot);
     /*TnCLEARSLOT2(tn,slot);  C++ destructor does the job! */
   }
-  if (TnLEFT(tn)) {
-    tn_clear(TnLEFT(tn));
-    TnFREEl(tn, TnLEFT(tn));
+  kid = TnLEFT(tn);
+  if (kid) {
+    tn_clear(kid);
+    tn_dtor((TN0*) kid);
+    FREE_TN(kid);
+    TnLEFT_set(tn,0);
   }
-  if (TnRIGHT(tn)) {
-    tn_clear(TnRIGHT(tn));
-    TnFREEr(tn, TnRIGHT(tn));
+  kid = TnRIGHT(tn);
+  if (kid) {
+    tn_clear(kid);
+    tn_dtor((TN0*) kid);
+    FREE_TN(kid);
+    TnRIGHT_set(tn,0);
   }
 }
 
-void
-tv_clear(XPVTV *tv)
+void tv_clear(XPVTV *tv)
 {
   assert(tv);
   if (!TvEMPTY(tv)) {
-    tn_clear(TvROOT(tv));
-    TvFREEROOT(tv);
+    TN *tn = TvROOT(tv);
+    tn_clear(tn);
+    tn_dtor((TN0*) tn);
+    FREE_TN(tn);
+    TvROOT_set(tv,0);
   }
   TvMAX(tv)=0;
   ++ TvVERSION(tv);
@@ -904,31 +946,36 @@ tv_clear(XPVTV *tv)
 
 #ifdef TV_ESEEK_FDECL
 
-#ifndef TV_ESEEK_LDECL
-#define TV_ESEEK_LDECL
-#endif
-#ifndef TV_ESEEK_SETUP
-#define TV_ESEEK_SETUP
-#endif
+# ifndef TV_ESEEK_LDECL
+#  define TV_ESEEK_LDECL
+# endif
+# ifndef TV_ESEEK_SETUP
+#  define TV_ESEEK_SETUP
+# endif
 
-#define TC_SEEK_FDECL TV_ESEEK_FDECL
-#define TC_SEEK_LDECL TV_ESEEK_LDECL
-#define TC_SEEK_SETUP TV_ESEEK_SETUP
-#define TC_SEEK_CMP(cmp,k,d) TV_ESEEK_CMP(cmp,k,d)
-#include "tv.seek"
+# define TC_SEEK_FDECL TV_ESEEK_FDECL
+# define TC_SEEK_LDECL TV_ESEEK_LDECL
+# define TC_SEEK_SETUP TV_ESEEK_SETUP
+# define TC_SEEK_CMP(cmp,k,d) TV_ESEEK_CMP(cmp,k,d)
+# ifdef TV_KEYCACHE
+#  define TC_SEEK_CMPf(cmp,kc) TV_ESEEK_CMPf(cmp,kc)
+# endif
+# include "tv.seek"
 #endif
 
 #ifdef TV_KEYD
-#define TC_SEEK_FDECL \
-int tc_seek(XPVTC *tc, TnKEY_T key, int unique)
-#define TC_SEEK_LDECL
-#define TC_SEEK_SETUP
-#define TC_SEEK_CMP(cmp,k,d) TV_KEYCMP(cmp,key,k)
-#include "tv.seek"
+# define TC_SEEK_FDECL \
+	int tc_seek(XPVTC *tc, TnKEY_T key, int unique)
+# define TC_SEEK_LDECL
+# define TC_SEEK_SETUP
+# define TC_SEEK_CMP(cmp,k,d)		TV_KEYCMP(cmp,key,k)
+# ifdef TV_KEYCACHE
+#  define TC_SEEK_CMPf(cmp,kc)	TV_KEYCMP(cmp,key,kc)
+# endif
+# include "tv.seek"
 #endif
 
-TnKEY_T
-tc_fetch(XPVTC *tc, TnFETCHDATA_T out)
+TnKEY_T tc_fetch(XPVTC *tc, TnFETCHDATA_T out)
 {
   XPVTV *tv;
   assert(tc);
@@ -940,7 +987,7 @@ tc_fetch(XPVTC *tc, TnFETCHDATA_T out)
   assert(tc_happy(tc));
   SCOPE {
     TN *tn = TcTNx(tc);
-    int slot = TcSLOTx(tc);
+    int slot = TcSLOT(tc);
     TnDAT_FETCH(out, TnDATx(tn,slot));
 #ifdef TV_KEYD
     return TnKEYx(tn,slot);
@@ -950,8 +997,7 @@ tc_fetch(XPVTC *tc, TnFETCHDATA_T out)
   }
 }
 
-void
-tc_store(XPVTC *tc, TnSTOREDATA_T data)
+void tc_store(TV_ARG_ XPVTC *tc, TnSTOREDATA_T data)
 {
   XPVTV *tv;
   TN *tn;
@@ -964,18 +1010,22 @@ tc_store(XPVTC *tc, TnSTOREDATA_T data)
   TcSYNCCHECK(tc,tv);
   assert(tc_happy(tc));
   tn = TcTNx(tc);
-  slot = TcSLOTx(tc);
+  slot = TcSLOT(tc);
   TV_PLANT_DAT(data);
   TV_UPROOT_DAT(TnDATx(tn,slot));
   TnDAT_ASSIGN(TnDATx(tn,slot),data);
+  if (slot == 0) {
+    TV_KCACHE_LOADl(tn);
+  } else if (slot == TnFILL(tn)) {
+    TV_KCACHE_LOADr(tn);
+  }
 }
 
 /* CCov: off */
 
 #ifdef TV_STATS
 
-void
-tv_treestats(XPVTC *tc, double *depth, double *center)
+void tv_treestats(XPVTC *tc, double *depth, double *center)
 {
   int nodes=0;
   XPVTV *tv;
@@ -1036,7 +1086,7 @@ tc_deepest(XPVTC *tc)
 
 
 /*
-Copyright © 1997-1998 Joshua Nathaniel Pritikin.  All rights reserved.
+Copyright © 1997-1999 Joshua Nathaniel Pritikin.  All rights reserved.
 
 This package is free software and is provided "as is" without express
 or implied warranty.  It may be used, redistributed and/or modified

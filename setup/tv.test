@@ -8,11 +8,32 @@
 #define TV_KEYD /**/
 
 /* You should not call these directly. */
-#define NEW_TN(near)		tv_testmalloc(sizeof(TN))
+#define NEW_TN(ret,near)	ret = (TN*) tv_testmalloc(sizeof(TN))
 
 #define TnDATA_T		SV*
 #define TV_PLANT_DAT(d)		*d = newSVsv(*d)
 #define TV_UPROOT_DAT(d)	SvREFCNT_dec(d)
 #define TV_DAT_2STRING(d)	SvPV(d, PL_na)
+
+#define TnKEY_T			char*
+#define TV_KEYCMP(cmp,a,b) \
+	cmp = strcmp(a,b)
+#define TV_PLANT_KEY(k)		assert(k); k=strdup(k)
+#define TV_UPROOT_KEY(k)	safefree(k)
+
+#define TV_KEYCACHE		char *tn_kcache[2];
+#define TV_KCACHE_INIT(kc)	kc = 0
+#define TV_KCACHE_CLEAR(kc) \
+  if (kc) safefree(kc)
+#define TV_KCACHE_LOAD(key, dat, kc)		\
+STMT_START {					\
+  if (kc) safefree(kc);				\
+  kc = strdup(key);				\
+} STMT_END
+
+/* see if TV_ARG works */
+#define USING_TV_ARG
+#define TV_ARG		int mythis
+#define TV_THIS		mythis
 
 #include "tv.public"

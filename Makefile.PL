@@ -1,6 +1,7 @@
 use ExtUtils::MakeMaker;
 
 my $testmode = 0;
+my $insure = 0;
 
 my @tvlib = (qw/tv.code tv.seek tv.private tv.public tv.sym tv.setup
 	     tvcommon.h tvcommon.c tvcommon0.h/);
@@ -19,12 +20,13 @@ if ($testmode) {
     } else {
 	push(@OBJ, qw(tietv.o tvcommon.o));
     }
-    push(@FLAGS, OPTIMIZE => '-g');
+    push @FLAGS, OPTIMIZE => '-g';
+    push @FLAGS, CC => 'insure', LD => 'insure' if $insure;
 } else {
     warn "...setting symlinks for launch\n";
     symlink "setup/tv.prod", "tietv.tmpl";
     symlink "setup/tvcommon0.prod", "tvcommon0.h";
-    push(@OBJ, qw(tietv.o tvcommon.o));
+    push @OBJ, qw(tietv.o tvcommon.o);
 }
 
 #my $prof = '-fprofile-arcs -ftest-coverage';
@@ -36,11 +38,10 @@ WriteMakefile(
 	      @PREFIX,
 	      @FLAGS,
 	      NAME		=> 'Tree::Fat',
-	      PREREQ_PM		=> { Test => 0.08, @PREREQ },
+	      PREREQ_PM		=> { Test => 1, @PREREQ },
 	      EXE_FILES		=> [qw(tvgen.pl)],
 	      INC => '-I.',
 	      VERSION_FROM	=> 'Fat.pm',
-#	      CC => "insure",
 	      OBJECT		=> join(' ', qw(Fat.o), @OBJ),
 	      PM		=> { 
 				    'Fat.pm' => '$(INST_LIBDIR)/Fat.pm',

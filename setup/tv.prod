@@ -14,4 +14,10 @@
 #define TV_UPROOT_DAT(d)	SvREFCNT_dec(d)
 #define TV_DAT_2STRING(d)	SvPV(d, PL_na)
 
+#define TnKEY_T			char*
+#define TV_KEYCMP(cmp,a,b) \
+	cmp = strcmp(a,b)
+#define TV_PLANT_KEY(k)		k=strdup(k)
+#define TV_UPROOT_KEY(k)	safefree(k)
+
 #include "tv.public"

@@ -1,8 +1,5 @@
 # -*-perl-*- please
 
-use Test;
-BEGIN { plan tests => 1 }
-
 use strict;
 use Tree::Fat;
 use IO::Handle;
@@ -114,7 +111,6 @@ sub bench_random {
 	STDERR->printf("  %-12s %7d\n", $k, $stats{$k});
     }
 }
-ok(1);
 
 __END__;
 

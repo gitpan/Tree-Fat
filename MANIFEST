@@ -1,38 +1,36 @@
-.psrc
+.psrc			Insure++ configuration hints
 CHANGES
-Fat.pm
-Fat.xs
-MANIFEST
+Fat.pm			Demo perl support
+Fat.xs			Demo perl interface
+MANIFEST		This list of files
 MANIFEST.SKIP
-Makefile.PL
+Makefile.PL		Script that generates Makefile
 README
-TODO
-cmp.pl
+TODO			The Wishlist
+cmp.pl			Generate silly data structure comparison table
 hv.t
-old/tv.private.005
-old/tv.seek.005
-pl/benchmark.t
-rotations.txt
+pl/benchmark.t		Rough performance estimation
+rotations.txt		How to visualize tree rotations
 setup/tv.prod
 setup/tv.test
-setup/tvcommon0.prod
-setup/tvcommon0.test
-t/0cursor.t
-t/0delete.t
-t/0easy.t
-t/0insert.t
-t/0moveto.t
+setup/tvcommon0.prod	Tree compile options
+setup/tvcommon0.test	Tree compile options (test)
 t/0null.t
-t/0seek.t
-t/test.pm
-tietv.tmpl
-tv.code
-tv.private
-tv.public
-tv.seek
-tv.setup
-tv.sym
-tvcommon.c
-tvcommon.h
-tvgen.pl
-typemap
+t/1easy.t
+t/cursor.t
+t/delete.t
+t/insert.t
+t/moveto.t
+t/seek.t
+t/test.pm		Library for test scripts
+tietv.tmpl		Tree configuration
+tv.code			Representation specific tree template
+tv.private		Private macros
+tv.public		Public macros & structure layouts
+tv.seek			Optimized binary-search template
+tv.setup		Sample *.tmpl template
+tv.sym			Representation specific symbols
+tvcommon.c		Generic tree manipulation
+tvcommon.h		Generic macros & structure layouts
+tvgen.pl		Template instantiator
+typemap			Demo typemap
