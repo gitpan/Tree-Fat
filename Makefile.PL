@@ -1,3 +1,4 @@
+use 5.005; # not strictly necessary but upgrading is healthy
 use ExtUtils::MakeMaker;
 
 my $testmode = 0;
