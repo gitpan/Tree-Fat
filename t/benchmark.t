@@ -120,24 +120,24 @@ __END__;
 
 
 random 60000:
-  center                0.2562
-  depth                11.8560
-  elapse                4.3365
-  fill                  0.7557
-  delete                3.4784
+  center                0.3725
+  depth                12.0590
+  elapse                3.3746
+  fill                  0.7614
+  delete                2.7263
 random 80000:
-  center                0.4166
-  depth                12.5816
-  elapse                5.6059
-  fill                  0.7577
-  delete                4.5906
+  center                0.3625
+  depth                12.9641
+  elapse                4.7299
+  fill                  0.7579
+  delete                3.8909
 Cursor Stats:
-  copyslot     1264865
-  delete        139204
-  depthcalc     542634
-  insert        156734
-  keycmp       7881119
-  rotate1        23485
-  rotate2         1222
-  stepnode      161925
-  tn_recalc      84290
+  copyslot     1191865
+  delete        129739
+  depthcalc     547063
+  insert        157043
+  keycmp       7797312
+  rotate1        23455
+  rotate2         1195
+  stepnode      145945
+  tn_recalc      83362

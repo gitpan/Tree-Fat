@@ -65,9 +65,21 @@ TnLEFT_set(tn,left); TnRIGHT_set(tn,right); \
 #define TnGUARDOK(tn) \
 	(TnGUARD(tn,1)==0xbadc0de && \
 	 TnGUARD(tn,2)==0xbadc0de)
+#define TnSNIFGUARD(tn)				\
+STMT_START {					\
+  int _x;					\
+  for (_x=0; _x < TnWIDTH; _x++) {		\
+    if (TnDAT(tn,_x) == (void*)0xbadc0de ||	\
+	TnKEY(tn,_x) == (char*)0xbadc0de) {	\
+      warn("snifguard failed at %d", _x);	\
+      assert(0);				\
+    }						\
+  }						\
+} STMT_END
 #else
 #define TnSCANID(tn)
 #define TnINITGUARD(tn)
+#define TnSNIFGUARD(tn) STMT_START {} STMT_END
 #endif
 
 /* backward compatibility */
@@ -76,8 +88,10 @@ TnLEFT_set(tn,left); TnRIGHT_set(tn,right); \
 
 #if defined(TV_TEST) && defined(TV_KEYD)
 #define TnCLEARSLOT1(tn,xx)	TnKEY(tn,xx)=(void*)0x69696969
+#define TnSLOTCLEAR(tn,xx)	(TnKEY(tn,xx)==(void*)0x69696969)
 #else
 #define TnCLEARSLOT1(tn,xx)
+#define TnSLOTCLEAR(tn,xx)	1
 #endif
 
 #if defined(TV_KEYD)
@@ -114,29 +128,38 @@ TnEND(tn) -= xx;						\
 } STMT_END
 
 /* must do memmove & memcpy to evade C++ operator overloading */
-#define TnSHIFTl(tn,start,end,delta)				\
-STMT_START {							\
-  if (start <= end) {						\
-  assert(delta);						\
-  memmove(&TnSLOT(tn,(start)-(delta)), &TnSLOT(tn,(start)),	\
-          TV_SLOTSIZE*((end)-(start)+1));			\
-  TcRSTAT(tc,TCS_COPYSLOT,(end)-(start)+1);			\
-  }								\
+#define TnSHIFTl(tn,start,end,delta)					\
+STMT_START {								\
+ if (start <= end) {							\
+  int _z;								\
+  assert(delta);							\
+  memmove(&TnSLOT(tn,(start)-(delta)), &TnSLOT(tn,(start)),		\
+          TV_SLOTSIZE*((end)-(start)+1));				\
+  TnSNIFGUARD(tn);							\
+  for (_z=(end)-(delta)+1; _z <= end; _z++) { TnCLEARSLOT1(tn,_z); }    \
+  TcRSTAT(tc,TCS_COPYSLOT,(end)-(start)+1);				\
+ }									\
 } STMT_END
-#define TnSHIFTr(tn,start,end,delta)				\
-STMT_START {							\
-  if (start <= end) {						\
-  assert(delta);						\
-  memmove(&TnSLOT(tn,(start)+(delta)), &TnSLOT(tn,(start)),	\
-          TV_SLOTSIZE*((end)-(start)+1));			\
-  TcRSTAT(tc,TCS_COPYSLOT,(end)-(start)+1);			\
-  }								\
+
+#define TnSHIFTr(tn,start,end,delta)					\
+STMT_START {								\
+ if (start <= end) {							\
+  int _z;								\
+  assert(delta);							\
+  memmove(&TnSLOT(tn,(start)+(delta)), &TnSLOT(tn,(start)),		\
+          TV_SLOTSIZE*((end)-(start)+1));				\
+  TnSNIFGUARD(tn);							\
+  for (_z=start; _z < (start)+(delta); _z++) { TnCLEARSLOT1(tn,_z); }   \
+  TcRSTAT(tc,TCS_COPYSLOT,(end)-(start)+1);				\
+ }									\
 } STMT_END
+
 #define TnCOPYRANGE(sn,s1,dn,d1,len)				\
 STMT_START {							\
   if (len) {							\
   assert(len > 0);						\
   memcpy(&TnSLOT(dn,d1), &TnSLOT(sn,s1), TV_SLOTSIZE * len);	\
+  TnSNIFGUARD(dn);						\
   TcRSTAT(tc,TCS_COPYSLOT,(len));				\
   }								\
 } STMT_END

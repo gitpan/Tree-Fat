@@ -22,6 +22,12 @@ preserving the functional abstraction.
 Get it via http://www.perl.com/CPAN/authors/id/JPRIT/ !
 
 
+** 03-04-98 RELEASE 1.02
+
+- Fixed an obscure bug in the insertion algorithm.  Tightened
+assertion constraints.
+
+
 ** 02-21-98 RELEASE 1.01
 
 - Hide tv_testmalloc unless TV_TEST is defined.

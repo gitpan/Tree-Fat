@@ -5,7 +5,17 @@
 #undef MAX
 #define	MAX(a, b)	((a) < (b) ? (b) : (a))
 
-#ifndef TV_TEST
+#ifdef TV_TEST
+
+#undef assert
+#define assert(what)					\
+if (!(what)) { 						\
+  croak("Assertion failed: file \"%s\", line %d",	\
+	__FILE__, __LINE__);				\
+  exit(1);						\
+}
+
+#else
 #undef assert
 #define assert(s)
 #endif
@@ -567,41 +577,6 @@ tn_xfer(XPVTC *tc, TN *n1, TN *n2, int sz)
   }
 }
 
-static void
-tn_openr(XPVTC *tc, TN *tn, int slot)
-{
-  int xa;
-  assert(TnFILL(tn) < TnWIDTH);
-  assert(slot >= TnFILL(tn)/2 && slot <= TnFILL(tn));
-  if (TnEND(tn) == TnWIDTH) {
-    /* if (slot == TnEND) recenter? XXX */
-    TnSHIFTl(tn, TnSTART(tn), TnSTART(tn)+slot, 1);
-    --TnSTART(tn);
-  } else {
-    TnSHIFTr(tn, TnSTART(tn)+slot, TnLAST(tn), 1);
-    ++TnEND(tn);
-  }
-  TnCLEARSLOT1(tn, TnSTART(tn)+slot);
-  TnCLEARSLOT2(tn, TnSTART(tn)+slot);
-}
-
-static void
-tn_openl(XPVTC *tc, TN *tn, int slot)
-{
-  int xa;
-  assert(TnFILL(tn) < TnWIDTH);
-  assert(slot >= 0 && slot <= TnFILL(tn)/2);
-  if (TnSTART(tn) == 0) {
-    TnSHIFTr(tn, TnSTART(tn)+slot, TnLAST(tn), 1);
-    ++TnEND(tn);
-  } else {
-    TnSHIFTl(tn, TnSTART(tn), TnSTART(tn)+slot, 1);
-    --TnSTART(tn);
-  }
-  TnCLEARSLOT1(tn, TnSTART(tn)+slot);
-  TnCLEARSLOT2(tn, TnSTART(tn)+slot);
-}
-
 /*
   This is a critical method to optimize.  Tree nodes should be as
   full as possible before adding more capacity.  If they can be kept
@@ -630,10 +605,9 @@ tc_insert(XPVTC *tc, TnSTOREDATA_T data)
     TCE *ce;
     assert(TnWIDTH >= 5);
     tn = NEW_TN(tv);
-    TnINIT(tn, 0, 0, 0);
+    TnINIT(tn, 1, 0, 0);
     TnINITGUARD(tn);
-    tn_openl(tc, tn,0);
-    TnSETSLOT(tn,TnLAST(tn),key,data);
+    TnSETSLOT(tn,TnSTART(tn),key,data);
     TnDEPTH(tn)=TnCALCDEPTH(tn);
     TcRSTAT(tc, TCS_DEPTHCALC, 1);
     TnTREEFILL(tn) = 1;
@@ -668,13 +642,30 @@ tc_insert(XPVTC *tc, TnSTOREDATA_T data)
        TcSLOT range = (0 .. TnFILL(tn)) */
     slot = TcSLOT(tc);
     if (TnFILL(tn) < TnWIDTH) {
+      int left;
       tc_adjust_treefill(tc, 1);
-      if (slot <= TnFILL(tn)/2) {
-	tn_openl(tc, tn, slot);
-      } else {
-	tn_openr(tc, tn, slot);
+
+      left = slot <= TnFILL(tn)/2;
+      while (1) {
+	if (left) {
+	  if (TnSTART(tn) == 0) { left = !left; continue; }
+	  TnSHIFTl(tn, TnSTART(tn), TnSTART(tn)+slot-1, 1);
+	  --TnSTART(tn);
+	  assert(TnSLOTCLEAR(tn,TnSTART(tn)+slot));
+	  TnCLEARSLOT2(tn, TnSTART(tn)+slot);
+	  break;
+	} else {
+	  if (TnEND(tn) == TnWIDTH) { left = !left; continue; }
+	  TnSHIFTr(tn, TnSTART(tn)+slot, TnLAST(tn), 1);
+	  ++TnEND(tn);
+	  assert(TnSLOTCLEAR(tn,TnSTART(tn)+slot));
+	  TnCLEARSLOT2(tn, TnSTART(tn)+slot);
+	  break;
+	}
       }
+
       TnSETSLOT(tn,TnSTART(tn)+slot,key,data);
+      TcSLOT(tc) = slot;
       assert(tn_happy0(tn));
       goto DONE;
     }

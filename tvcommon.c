@@ -5,7 +5,17 @@
 #undef MAX
 #define	MAX(a, b)	((a) < (b) ? (b) : (a))
 
-#ifndef TV_TEST
+#ifdef TV_TEST
+
+#undef assert
+#define assert(what)						\
+if (!(what)) {							\
+	    croak("Assertion failed: file \"%s\", line %d",	\
+		__FILE__, __LINE__);				\
+	    exit(1);						\
+}
+
+#else
 #undef assert
 #define assert(s)
 #endif
@@ -745,6 +755,28 @@ tc_step(XPVTC *tc, I32 delta)
 }
 
 /* CCOV: off */
+
+/* avoid surprises with built-in memory copying
+   optimize XXX
+PRIVATE void
+tv_memmove(void *dst, void *src, int len)
+{
+  unsigned long dstp = (long) dst;
+  unsigned long srcp = (long) src;
+
+  if (dstp - srcp >= len) {
+    int xx;
+    for (xx=0; xx < len; xx++) {
+      ((char*)dst)[xx] = ((char*)src)[xx];
+    }
+  } else {
+    int xx;
+    for (xx=len-1; xx >= 0; xx--) {
+      ((char*)dst)[xx] = ((char*)src)[xx];
+    }
+  }
+}
+/**/
 
 #ifdef TV_STATS
 

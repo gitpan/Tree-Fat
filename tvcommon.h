@@ -312,5 +312,7 @@ int tc_rotate(XPVTC *tc, int looseness);
 int tc_freetn(XPVTC *tc, XPVTV *tv, TN0 *tn);
 void tv_recalc(XPVTV *tv);
 void *tv_testmalloc(size_t size);
+/*#define tv_memcpy tv_memmove  /*optimize XXX*/
+/*void tv_memmove(void *dst, void *src, int len);*/
 
 #endif

@@ -29,7 +29,7 @@ WriteMakefile(
 	      NAME		=> 'Tree::Fat',
 	      PREREQ_PM		=> { Test => 0.08, @PREREQ },
 	      EXE_FILES		=> [qw(tvgen.pl)],
-	      OPTIMIZE		=> join(' ', '-DDEBUGGING', '-O2', '-I.', @FLAGS),
+	      OPTIMIZE		=> join(' ', '-O2', '-I.', @FLAGS),
 
 	      VERSION_FROM	=> 'Fat.pm',
 	      OBJECT		=> join(' ', qw(Fat.o), @OBJ),
