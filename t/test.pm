@@ -4,19 +4,9 @@ package test;
 use Carp;
 require Tree::Fat;
 require Exporter;
-use vars  qw(@ISA @EXPORT $test);
+use vars  qw(@ISA @EXPORT);
 @ISA    = qw(Exporter);
-@EXPORT = qw(&ok $test &permutation);
-$test = 1;
-
-sub ok {
-    my ($ok, $guess) = @_;
-    carp "This is ok $test" if $guess && $guess != $test;
-    print(($ok? '':'not ')."ok $test\n");
-#    croak $test if !$ok;
-    ++ $test;
-    $ok;
-}
+@EXPORT = qw(&permutation);
 
 # Thanks to Guy Decoux <decoux@moulon.inra.fr> for this non-recursive
 # permutation algorithm.  He attributes it to a french cooking book by
@@ -54,7 +44,7 @@ sub permutation ($) {
     };
 }
 
-package Tree::Fat::Test;
+package Tree::Fat;
 
 sub keys {
     my ($o) = @_;

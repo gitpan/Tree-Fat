@@ -1,37 +1,31 @@
+REFCNTS!
+
+tvgen.pl
+  copy tvcommon.[ch] if newer
 
 *** SCALING UP
 
-tree compression
-  fix delete with rotations
-  if TnFILL < TnWIDTH / 3 then stepnode to look for a merger
+torture test
 
-tc_insert
-  try harder to find easy places to do insertions
-  bigger benchmarks
-
-rotation
-  investigate LL & RR splay style rotations
-
-tc_seek
-  OPTIMIZE!!  Can probably get keycmp number down 50-70%.
-
-fake-up a tied array API
-  push/unshift flags
-  pop/shift flags
-
-allow treefill/depth updates to be switched off temporarily
+allow treefill/depth updates to be switched off temporarily?
   reduce the need for write locks == parallel insert mode!
 
-macros
-  run through a profiler
-  try memmove!
-  replace TnCALCDEPTH with something faster?
-  improve FREE macro?
-  store the TcSTAT names somewhere so we can nuke the #defines
+bulk insert/delete (for arrays)??
 
-keep track nodes-per-subtree?
+perl interface
+  REFCNT!
+  push/unshift & pop/shift flags
+  transient hash-ref indices?
+  tied array API & glue
+  array: mapkeys / mapvalues?
 
-factor out key/data independent methods into a common library
+OPTIMIZE!
+  bigger better benchmarks
 
-split out ccovscan.pl
+tc_delete
+  try 2-level rotations?
+
+compile option for dynamically sized node arrays?
+
+for t in ./t/0*; do echo $t; perl -Mblib -w $t; done
 

@@ -1,0 +1,332 @@
+/***-*-C-*-******************** PRIVATE! */
+/******************************* YOU SHOULD NOT EVEN INCLUDE THIS FILE! */
+
+#ifndef _TV_SNEAKY_ON_
+#error DO NOT INCLUDE THIS FILE!
+#endif
+
+#define SCOPE	if(1)
+#define END_SCOPE
+
+#undef MIN
+#define	MIN(a, b)	((a) < (b) ? (a) : (b))
+#undef MAX
+#define	MAX(a, b)	((a) < (b) ? (b) : (a))
+
+#ifndef TV_PLANT_KEY
+#define TV_PLANT_KEY(k)
+#endif
+#ifndef TV_UPROOT_KEY
+#define TV_UPROOT_KEY(k)
+#endif
+#ifndef TV_DAT_2STRING
+#define TV_DAT_2STRING(x) "?"
+#endif
+
+#define TnMIDDLE	(TnWIDTH/2)
+#define TnDEFAULTMARGIN	MAX(1,TnWIDTH/8)
+#define TnLEFT(tn)	(tn)->tn_kids[0]
+#define TnRIGHT(tn)	(tn)->tn_kids[1]
+#define TnKID(tn,xx)	(tn)->tn_kids[xx]
+#define TnSTART(tn)	(tn)->tn_start
+#define TnEND(tn)	(tn)->tn_end
+#define TnLAST(tn)	(TnEND(tn)-1)
+#define TnGUARD(tn,xx)	(tn)->guard##xx
+#ifdef TV_TEST
+#define TnSCANID(tn)	(tn)->tn_scanid
+#define TnINITGUARD(tn)	\
+	TnGUARD(tn,1)=0xbadc0de;\
+	TnGUARD(tn,2)=0xbadc0de;\
+	TnGUARD(tn,3)=0xbadc0de;\
+	TnSCANID(tn)=0;
+#define TnGUARDOK(tn) \
+	(TnGUARD(tn,1)==0xbadc0de && \
+	 TnGUARD(tn,2)==0xbadc0de && \
+	 TnGUARD(tn,3)==0xbadc0de)
+#else
+#define TnSCANID(tn)
+#define TnINITGUARD(tn)
+#endif
+
+#define TnINIT(tn,fill,left,right) \
+STMT_START { \
+TnSTART(tn)=(TnWIDTH - (fill))/2; \
+TnEND(tn)=TnSTART(tn) + (fill); \
+TnLEFT(tn)=left; TnRIGHT(tn)=right; \
+TnINITGUARD(tn) \
+} STMT_END
+
+#define TnFILL(tn)	(TnEND(tn) - TnSTART(tn))
+#define TnEMPTY(tn)	(TnSTART(tn) == TnEND(tn))
+#define TnDEPTH(tn)	(tn)->tn_depth
+#define TnDEPTHx(tn)	((tn)? (tn)->tn_depth : 0)
+#define TnCALCDEPTH(tn) \
+	(1+(TnLEFT(tn) && TnRIGHT(tn) ?			\
+	    MAX(TnDEPTH(TnLEFT(tn)),TnDEPTH(TnRIGHT(tn))):	\
+	    (TnLEFT(tn)? TnDEPTH(TnLEFT(tn)):		\
+	     (TnRIGHT(tn)? TnDEPTH(TnRIGHT(tn)):		\
+	      0))))
+	/* DO NOT OPTIMIZE until running through the profiler! */
+#define TnDAT(tn,xx)	(tn)->tn_slots[xx].slot_dat
+#define TnDATx(tn,xx)	(tn)->tn_slots[TnSTART(tn) + xx].slot_dat
+#ifdef TV_TEST
+
+#define TnFREEl(tn,it)					\
+STMT_START {						\
+  assert(it==TnLEFT(tn));				\
+  if (!tn_emptied(it)) { tn_dump(it, -2, 0); assert(0); }	\
+  FREE_TN(TnLEFT(tn)); 					\
+  TnLEFT(tn)=0;						\
+} STMT_END
+
+#define TnFREEr(tn,it)					\
+STMT_START { 						\
+  assert(it==TnRIGHT(tn));				\
+  if (!tn_emptied(it)) { tn_dump(it, -2, 0); assert(0); }	\
+  FREE_TN(TnRIGHT(tn)); 				\
+  TnRIGHT(tn)=0; 					\
+} STMT_END
+
+#else
+#define TnFREEl(tn,it) \
+	STMT_START { FREE_TN(TnLEFT(tn)); TnLEFT(tn)=0; } STMT_END
+#define TnFREEr(tn,it) \
+	STMT_START { FREE_TN(TnRIGHT(tn)); TnRIGHT(tn)=0; } STMT_END
+#endif
+/* backward compatibility */
+#define TnSUBl(tn,xx)	(xx==0? TnLEFT(tn) : (xx==TnFILL(tn)? TnRIGHT(tn) : 0))
+#define TnSUBr(tn,xx)	(xx==TnFILL(tn)-1 ? TnRIGHT(tn) : 0)
+
+#if defined(TV_KEYD)
+#define TnKEY(tn,xx)		(tn)->tn_slots[xx].slot_key
+#define TnKEYx(tn,xx)		(tn)->tn_slots[TnSTART(tn) + xx].slot_key
+#define TnSETSLOT(tn,xx,k,d) \
+	STMT_START { TnKEY(tn,xx)=k; TnDAT(tn,xx)=d; } STMT_END
+#define TnCOPYSLOT(sn,sx,dn,dx) \
+	STMT_START { \
+	  TnKEY(dn,dx)=TnKEY(sn,sx); TnDAT(dn,dx)=TnDAT(sn,sx); \
+          TcRSTAT(tc,TCS_COPYSLOT,1); \
+	} STMT_END
+#define TV_SETREMOTE(tc,key)	tc_seek(tc,key)
+
+#ifdef TV_TEST
+#define TnCLEARSLOT(tn,xx)	TnKEY(tn,xx)=(void*)0x69696969
+#else
+#define TnCLEARSLOT(tn,xx)
+#endif
+
+#else
+#define TV_KEYCMP(cmp,a,b)
+#define TnKEY(tn,xx)		xx
+#define TnKEYx(tn,xx)		xx
+#define TnSETSLOT(tn,xx,k,d) \
+	STMT_START { TnDAT(tn,xx)=d; } STMT_END
+#define TnCOPYSLOT(sn,sx,dn,dx) \
+  STMT_START { TnDAT(dn,dx)=TnDAT(sn,sx); TcRSTAT(tc,TCS_COPYSLOT,1); } STMT_END
+#define TV_SETREMOTE(tc,key)	tc_moveto(tc,key)
+#define TnCLEARSLOT(tn,xx)	break
+#endif
+
+#define TnSHIFT(tn,xx) \
+STMT_START {							\
+int _sx; for (_sx=TnSTART(tn); _sx < TnSTART(tn)+(xx); _sx++) {	\
+  TnCLEARSLOT(tn,_sx);						\
+}								\
+TnSTART(tn) += xx;						\
+} STMT_END
+
+#define TnPOP(tn,xx) \
+STMT_START {							\
+int _sx; for (_sx=TnLAST(tn); _sx > TnLAST(tn)-(xx); _sx--) {	\
+  TnCLEARSLOT(tn,_sx);						\
+}								\
+TnEND(tn) -= xx;						\
+} STMT_END
+
+#define TnSHIFTl(tn,start,end,delta) \
+STMT_START {							\
+  int _xa; for (_xa=start; _xa <= end; _xa++) {	\
+    TnCOPYSLOT(tn,_xa, tn, _xa-(delta));			\
+  }								\
+} STMT_END
+#define TnSHIFTr(tn,start,end, delta) \
+STMT_START {							\
+  int _xa; for (_xa=end; _xa >= start; _xa--) {	\
+    TnCOPYSLOT(tn,_xa, tn, _xa+(delta));			\
+  }								\
+} STMT_END
+#define TnCOPYRANGE(sn,s1,dn,d1,len) \
+STMT_START {							\
+  int _sx, _dx, _cnt;						\
+  for (_sx=(s1), _dx=(d1), _cnt=(len); _cnt; _cnt--,_sx++,_dx++) {	\
+    TnCOPYSLOT(sn,_sx, dn,_dx);					\
+  }								\
+} STMT_END
+
+#define TvEMPTY(tv)		(TvFILL(tv)==0)
+#define TvFREEROOT(tv) \
+	STMT_START { FREE_TN(TvROOT(tv)); TvROOT(tv)=0; } STMT_END
+#define TvVERSION(tv)		(tv)->xtv_version
+#define TvFLAGS(tv)		(tv)->xtv_flags
+#define TVptv_PARALLEL		0x00000001
+#define TvPARALLEL(tv)		(TvFLAGS(tv) & TVptv_PARALLEL)
+#define TvPARALLEL_on(tv)	(TvFLAGS(tv) |= TVptv_PARALLEL)
+#define TvPARALLEL_off(tv)	(TvFLAGS(tv) &= ~TVptv_PARALLEL)
+
+#define TcVERSION(tc)		(tc)->xtc_version
+#define TcSYNCCHECK(tc,tv) \
+	if (TcVERSION(tc) != TvVERSION(tv)) \
+	  TV_PANIC("TV: cursor(0x%p) out of sync with tree(0x%p)", tc,tv);
+#define TcMARGIN(tc)		(tc)->xtc_margin
+#define TcPATH(tc)		(tc)->xtc_path
+#define TcFILL(tc)		(tc)->xtc_fill
+#define TcMAX(tc)		(tc)->xtc_max
+#define TcPOS(tc)		(tc)->xtc_pos
+#define TcFIXDEPTHABOVE(tc, start)		\
+STMT_START {					\
+  int _xa;					\
+  for (_xa=(start)-1; _xa >= 0; _xa--) {	\
+    TN *_tn;					\
+    assert(_xa < TcFILL(tc));			\
+    _tn = CeTN(TcCE(tc,_xa));			\
+    assert(_tn);				\
+    TnDEPTH(_tn) = TnCALCDEPTH(_tn);		\
+  }						\
+} STMT_END
+
+#ifdef TV_TEST
+#define CeTRASH(ce)		CeTN(ce) = (TN*)0x69696969
+#else
+#define CeTRASH(ce)
+#endif
+#define TcPUSH(tc,tn)				\
+STMT_START {					\
+  TCE *_ce;					\
+  TN *_topush = (tn);				\
+  assert(tc);					\
+  assert(_topush);				\
+  TcSLOT(tc) = -2;				\
+  if (TcFILL(tc)+1 > TcMAX(tc)) tc_extend(tc);	\
+  TcFILL(tc)+=1;				\
+  _ce = TcCEx(tc);				\
+  CeTN(_ce) = _topush;				\
+  CeFLAGS(_ce) = 0;				\
+} STMT_END
+
+#define TcPOP(tc)		CeTRASH(TcCEx(tc)); --TcFILL(tc)
+#define TcTN(tc,xx)		(tc)->xtc_path[xx].tce_tn
+#define TcTNx(tc)		(tc)->xtc_path[TcFILL(tc)-1].tce_tn
+#define TcSLOT(tc)		(tc)->tce_slot
+#define TcSLOTx(tc)		(tc)->tce_slot
+#define TcCE(tc,xx)		(&(tc)->xtc_path[xx])
+#define TcCEx(tc)		(&(tc)->xtc_path[TcFILL(tc)-1])
+#ifdef TV_STATS
+#define TcRSTAT(tc,st,xx)	(tc)->xtc_stats[st] += xx
+#else
+#define TcRSTAT(tc,st,xx)
+#endif
+#define TcCUT(tc,at) \
+STMT_START {					\
+  int _xa;					\
+  for (_xa=(at)+1; _xa < TcFILL(tc); _xa++) {	\
+    *TcCE(tc, _xa-1) = *TcCE(tc, _xa);		\
+  }						\
+  CeTRASH(TcCEx(tc));				\
+  --TcFILL(tc);					\
+} STMT_END
+
+#define TcFLOW(tc) \
+STMT_START {					\
+    TCE *_ce = TcCEx(tc);			\
+    if (TcFORWARD(tc)) {			\
+      CeRIGHT_off(_ce);				\
+      CeLEFT_on(_ce);				\
+    } else {					\
+      CeLEFT_off(_ce);				\
+      CeRIGHT_on(_ce);				\
+    }						\
+} STMT_END
+
+#define TcFLOWx(tc,dir) \
+STMT_START {					\
+  TcFORWARD_off(tc);				\
+  if (dir > 0) TcFORWARD_on(tc);		\
+  TcFLOW(tc);					\
+} STMT_END
+
+/* rename to STEPFWD? */
+#define TcGOFWD(tc) \
+STMT_START {					\
+  if (!TcFORWARD(tc)) {				\
+    TCE *_ce = TcCEx(tc);			\
+    DEBUG_step(warn("going FORWARD"));		\
+    if (CeRIGHT(_ce)) {				\
+      CeRIGHT_off(_ce);				\
+      CeLEFT_on(_ce);				\
+    }						\
+    TcFORWARD_on(tc);				\
+  }						\
+} STMT_END
+
+#define TcGOBWD(tc) \
+STMT_START {					\
+  if (TcFORWARD(tc)) {				\
+    TCE *ce = TcCEx(tc);			\
+    DEBUG_step(warn("going BACKWARD"));		\
+    if (CeLEFT(ce)) {				\
+      CeLEFT_off(ce);				\
+      CeRIGHT_on(ce);				\
+    }						\
+    TcFORWARD_off(tc);				\
+  }						\
+} STMT_END
+
+#define CeTN(ce)		(ce)->tce_tn
+#define CeFLAGS(ce)		(ce)->tce_flags
+
+#define CEptv_LEFT		0x0001
+#define CEptv_RIGHT		0x0002
+#define CeLEFT(ce)		(CeFLAGS(ce) & CEptv_LEFT)
+#define CeLEFT_on(ce)		(CeFLAGS(ce) |= CEptv_LEFT)
+#define CeLEFT_off(ce)		(CeFLAGS(ce) &= ~CEptv_LEFT)
+#define CeRIGHT(ce)		(CeFLAGS(ce) & CEptv_RIGHT)
+#define CeRIGHT_on(ce)		(CeFLAGS(ce) |= CEptv_RIGHT)
+#define CeRIGHT_off(ce)		(CeFLAGS(ce) &= ~CEptv_RIGHT)
+
+#define TcFLAGS(tc)		(tc)->xtc_flags
+#define TCptv_MATCH		0x00000001
+#define TCptv_FORWARD		0x00000002
+#define TCptv_START		0x00000004
+#define TCptv_END		0x00000008
+#define TcMATCH(tc)		(TcFLAGS(tc) & TCptv_MATCH)
+#define TcMATCH_on(tc)		(TcFLAGS(tc) |= TCptv_MATCH, \
+				 TcFLAGS(tc) &= ~(TCptv_START|TCptv_END))
+#define TcMATCH_off(tc)		(TcFLAGS(tc) &= ~TCptv_MATCH)
+#define TcFORWARD(tc)		(TcFLAGS(tc) & TCptv_FORWARD)
+#define TcBACKWARD(tc)		(!TcFORWARD(tc))
+#define TcFORWARD_on(tc)	(TcFLAGS(tc) |= TCptv_FORWARD)
+#define TcFORWARD_off(tc)	(TcFLAGS(tc) &= ~TCptv_FORWARD)
+#define TcSTART(tc)		(TcFLAGS(tc) & TCptv_START)
+#define TcSTART_on(tc)		(TcFLAGS(tc) |= TCptv_START)
+#define TcEND(tc)		(TcFLAGS(tc) & TCptv_END)
+#define TcEND_on(tc)		(TcFLAGS(tc) |= TCptv_END)
+#define TcSTARTEND_off(tc)	(TcFLAGS(tc) &= ~(TCptv_START|TCptv_END))
+
+#ifdef TV_TEST
+#ifndef TV_DUMP
+#define TV_DUMP
+#endif
+#ifndef TV_DEBUG
+#define TV_DEBUG
+#endif
+#endif
+
+#ifdef TV_DEBUG
+#define DEBUG_step(a)   if (tv_debug & 1)  a
+#define DEBUG_rotate(a) if (tv_debug & 2)  a
+#define DEBUG_seek(a)   if (tv_debug & 4)  a
+#else
+#define DEBUG_step(a)
+#define DEBUG_rotate(a)
+#define DEBUG_seek(a)
+#endif

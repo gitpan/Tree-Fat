@@ -2,10 +2,8 @@
 
 TYPEMAP
 
-debXPVTV *			O_OBJECT
-debXPVTC *			O_OBJECT
-tieXPVTV *			O_OBJECT
-tieXPVTC *			O_OBJECT
+XPVTV *			O_OBJECT
+XPVTC *			O_OBJECT
 
 ######################################################################
 

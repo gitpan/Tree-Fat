@@ -2,12 +2,13 @@
 
 /* Tree node size.  Cannot be set at runtime since field offsets must
    be compile time for performance.  Should be >= 4. */
-#define TnWIDTH		19
+#define TnWIDTH		7
 
 /* Either use real keys or implied index locations. */
 #define TV_KEYD /**/
 
-#define NEW_TN(near)		(TN*) safemalloc(sizeof(TN))
+/* You should not call these directly. */
+#define NEW_TN(near)		tv_testmalloc(sizeof(TN))
 
 #define TnDATA_T		SV*
 #define TV_PLANT_DAT(d)		*d = newSVsv(*d)

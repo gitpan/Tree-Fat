@@ -1,24 +1,10 @@
 # -*-perl-*- please
 
-BEGIN { print "1..5\n"; }
-
-use lib './t';
-use test;
 use strict;
+use Test;
+BEGIN { todo tests => 5 }
 
-package Tree::Fat;
-
-sub TIEHASH {
-    bless Tree::Fat->new(), shift;
-}
-
-sub new_hash {
-    my %fake;
-    tie %fake, shift;
-    \%fake;
-}
-
-package main;
+require Tree::Fat;
 
 my $pkg = 'Tree::Fat';
 

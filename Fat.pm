@@ -9,9 +9,23 @@ require AutoLoader;
 
 @ISA = qw(Exporter DynaLoader);
 @EXPORT = qw();
-$VERSION = '0.04';
+$VERSION = '0.07';
 
 bootstrap Tree::Fat $VERSION;
+
+sub TIEHASH {
+    bless Tree::Fat->new(), shift;
+}
+
+sub new_hash {
+    my %fake;
+    tie %fake, shift;
+    \%fake;
+}
+
+*fetch = \&FETCH;
+*clear = \&CLEAR;
+*delete = \&DELETE;
 
 1;
 __END__
@@ -24,14 +38,14 @@ Tree::Fat - Perl Extension to Implement Fat-Node Trees
 
   use Tree::Fat
 
-  my $t = new Tree::Fat();
-  $t->STORE('key', 'value');
+  my $t = Tree::Fat->new_hash;
+  $t->{'key'} = 'value';
 
 or
 
-  1. C<tvgen.pl -p PREFIX>
+  1. tvgen.pl -p PREFIX
 
-  2. Edit C<PREFIXtv.tmpl>
+  2. Edit PREFIXtv.tmpl
 
   3. Compile and link into your own application!
 
@@ -46,50 +60,50 @@ all-terrain performance.
  ---------- ----------- ------------ ---------- -------- ------------
  Arrays     fastest     so-so        not good   min      yes
  Hashes     fast        good         so-so      so-so    no
- Fat-Trees  medium      silly        big        varies   yes
+ Fat-Trees  medium      silly        big        good     yes
 
-And if you are interested in using I<persistent> trees in perl (and
-even leaving SQL behind), then you might want to check out the
-C<ObjStore> extension by the same author!
+=head1 WHAT IS A FAT-TREE?
+
+It's a cross between a tree and an array!  Each tree node contains a
+fixed length array of elements.  An F-Tree can be used as either type
+of data structure!  Tree performance is enhanced by balancing array
+operations with tree operations.  Tree operations are better optimized
+by taking arrays into account.  All array operations become O(log n)
+time.
+
+=head1 HOW ABOUT PERSISTANCE?
+
+F-Trees are designed for embedding.  (If you want I<persistent>
+F-Trees without the work, then check out the C<ObjStore> extension by
+the same author.  They are already integrated into the ObjectStore
+database, right now!)
 
 =head1 CURSOR BEHAVIOR
 
 The only way to access a tree is via a cursor.  Cursors behavior is
-derived from the principle of least-surprise (rather than efficiency).
+derived from the principle of least-surprise (rather than greatest
+efficiency).  More documentation doesn't exist.  Read the source code
+for more information.
+
+=over 4
+
+=item *
 
 Both cursors and trees store a version number.  If you modify the same
 tree with more than one cursor, you can get mismatched versions.  If
 there is a mismatch, an exception is thrown.
 
-If you allow duplicate keys, seek always returns the first key that
-matches.  For example, the cursor will match at the first instance of
-'c': (a,b,*c,c,c,d,e).
+=item *
 
-Complete cursor behavior ridiculously complicated and cannot be
-explained in one sentence.  The method C<tc_happy> in C<tv.code> gives
-a full listing of valid states and constraints.
+If you allow duplicate keys, seek always returns the first key that
+matches.  For example, the cursor will always match at the first
+instance of 'c': (a,b,*c,c,c,d,e).
+
+=back
 
 =head1 EMBEDDING API
 
-  XPVTV *init_tv(XPVTV *tv);
-  void free_tv(XPVTV *tv);
-  void tv_clear(XPVTV *tv);
-  void tv_insert(TcTV_T tv, TnKEY_T key, TnDATA_T *data);
-  int tv_fetch(TcTV_T tv, TnKEY_T, TnDATA_T *out);
-  void tv_delete(TcTV_T tv, TnKEY_T key);
-  void tv_treestats(TcTV_T tv, double *depth, double *center);
-
-  XPVTC *init_tc(XPVTC *tc, TcTV_T tv);
-  void free_tc(XPVTC *tc);
-  void tc_reset(XPVTC *tc);
-  void tc_step(XPVTC *tc, I32 delta);
-  TnKEY_T tc_fetch(XPVTC *tc, TnDATA_T *out);
-  void tc_store(XPVTC *tc, TnDATA_T *data);
-  int tc_seek(XPVTC *tc, TnKEY_T key);
-  void tc_insert(XPVTC *tc, TnKEY_T key, TnDATA_T *data);
-  void tc_delete(XPVTC *tc);
-  void tc_moveto(XPVTC *tc, I32 xto);
-  I32 tc_pos(XPVTC *tc);
+XXX
 
 =head1 PERFORMANCE
 
@@ -114,8 +128,6 @@ allocated contiguously from the available slots.  The best arrangement
 centered.
 
 =back
-
-[Earlier releases were not measured or tuned for performance.]
 
 =head1 REFERENCES
 
@@ -172,7 +184,13 @@ UNACCEPTABLE and it is hard to trust a single vendor to debug their
 code properly.  (And worse to have each vendor do their own
 implementation!)
 
-Get it at http://www.perl.com/CPAN/authors/id/JPRIT/!
+Get it via http://www.perl.com/CPAN/authors/id/JPRIT/ !
+
+=head1 DIRECTION
+
+More perl glue in the form of tied arrays and multikey indices.
+
+Embedding documentation.
 
 =head1 AUTHOR
 

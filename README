@@ -1,6 +1,16 @@
+WHAT IS A FAT-TREE?
+
+It's a cross between a tree and an array!  Each tree node contains a
+fixed length array of elements.  An F-Tree can be used as either type
+of data structure!  Tree performance is enhanced by balancing array
+operations with tree operations.  Tree operations are better optimized
+by taking arrays into account.  All array operations become O(log n)
+time.
+
+
 Name           DSLI  Description                                  Info
 -----------    ----  -------------------------------------------- -----
-Tree::Fat      adcO  Embeddable F-Tree Algorithm Suite            JPRIT
+Tree::Fat      bdcO  Embeddable F-Tree Algorithm Suite            JPRIT
 
 Implements object-oriented trees using algorithms adapted from b-trees
 and AVL trees (without resorting to yucky C++).
@@ -9,17 +19,34 @@ and AVL trees (without resorting to yucky C++).
 The reasons for another tree implementation are as follows:
 
 - Publically available code is the best tested.  Buggy trees are
-completely unacceptable.  This module includes test coverage analysis.
+completely unacceptable.  This module has been put through test
+coverage analysis and stress testing.
 
 - The algorithms have been completely separated from any notion of a
-database; the code is tweaked for easy embedding into other
-applications.
+database.  The code is tweaked for easy embedding into other
+applications.  A very flexible set of hooks are available while still
+preserving the functional abstraction.
 
 
 Get it via http://www.perl.com/CPAN/authors/id/JPRIT/ !
 
 
-** 01-01-98 Release 0.03
+** 01-23-98 RELEASE 0.07
+
+- Factored out code that isn't sensitive to key/data layout.
+Unfortunately, this change necessitated tweaking the memory layout.
+
+- tc_insert has much better overall performance.  tc_seek now does a
+full binary search.  tc_delete is re-implemented with rotations.
+Asymptotic performance is now respectable.
+
+- tv_compress, tv_balance added.
+
+- memmove & memcpy of slots used throughout (instead of assignment).
+Added more hooks for C++.  Fixed cpp (re)directives.
+
+
+** 01-01-98 RELEASE 0.03
 
 - First public release.
 
