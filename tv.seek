@@ -1,0 +1,104 @@
+/* -*-C-*-
+
+This is the number-one most heavily executed method.  OPTIMIZE!!
+
+Use these macros to declare your own seek method:
+
+TV_ESEEK_FDECL
+TV_ESEEK_LDECL
+TV_ESEEK_SETUP;
+TV_ESEEK_CMP(cmp, key, dat);
+
+Obviously, it would be impolite to change any variable names or
+calling convensions below.  These changes will be minimized.
+*/
+
+#ifndef TC_SEEK_BREAK_EVEN
+#define TC_SEEK_BREAK_EVEN 6
+#endif
+
+TC_SEEK_FDECL
+{
+  XPVTV *tv;
+  TCE *ce;
+  TN *tn;
+  int cmp;
+  TC_SEEK_LDECL
+
+  assert(tc);
+  tc_reset(tc);
+  tv = TcTV(tc);
+  tn = TvROOT(tv);
+  if (!tn) {
+    return 0;
+  }
+  TcSTARTEND_off(tc);
+  TcFORWARD_on(tc);
+  TcPOS(tc) = 0;
+  TcPUSH(tc, tn);
+  TC_SEEK_SETUP
+
+ DOWN:
+  ce = TcCEx(tc);
+  tn = CeTN(ce);
+  CeLEFT_on(ce);
+  if (TnLEFT(tn)) {
+    TC_SEEK_CMP(cmp, TnKEYx(tn,0), TnDATx(tn,0));
+    TcRSTAT(tc, TCS_KEYCMP, 1);
+    TcSLOT(tc) = 0;
+    if (cmp < 0) {
+      TcPUSH(tc, TnLEFT(tn));
+      goto DOWN;
+    }
+    else if (cmp == 0) {
+      TcPOS(tc) += TnTREEFILL(TnLEFT(tn));
+      TcMATCH_on(tc);
+      goto DONE;
+    }
+    TcPOS(tc) += TnTREEFILL(TnLEFT(tn));
+  }
+  if (TnRIGHT(tn)) {
+    TC_SEEK_CMP(cmp, TnKEY(tn,TnLAST(tn)), TnDAT(tn,TnLAST(tn)));
+    TcRSTAT(tc, TCS_KEYCMP, 1);
+    TcSLOT(tc) = TnFILL(tn)-1;
+    if (cmp > 0) {
+      TcPOS(tc) += TnFILL(tn);
+      CeLEFT_off(ce);
+      CeRIGHT_on(ce);
+      TcPUSH(tc, TnRIGHT(tn));
+      goto DOWN;
+    } else if (cmp == 0) {
+      TcPOS(tc) += TnFILL(tn)-1;
+      TcMATCH_on(tc);
+      goto DONE;
+    }
+  }
+  SCOPE {
+    int xa;
+    for (xa=0; xa < TnFILL(tn); xa++) {
+      TC_SEEK_CMP(cmp, TnKEYx(tn,xa), TnDATx(tn,xa));
+      TcRSTAT(tc, TCS_KEYCMP, 1);
+      if (cmp == 0) {
+	TcSLOT(tc) = xa;
+	TcMATCH_on(tc);
+	goto DONE;
+      } else if (cmp < 0) {
+	--TcPOS(tc);
+	TcSLOT(tc) = xa-1;
+	goto DONE;
+      }
+      ++TcPOS(tc);
+    }
+  }
+  --TcPOS(tc);
+  TcSLOT(tc) = TnFILL(tn)-1;
+
+ DONE:
+  assert(tc_happy(tc));
+  return TcMATCH(tc) != 0;
+}
+
+#undef TC_SEEK_FDECL
+#undef TC_SEEK_LDECL
+#undef TC_SEEK_SETUP
+#undef TC_SEEK_CMP

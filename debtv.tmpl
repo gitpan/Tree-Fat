@@ -1,0 +1,59 @@
+/* Be careful to only edit the *.tmpl file.  It's -*-C-*- source. */
+
+/* slurp perl; change as needed */
+#ifdef __cplusplus
+extern "C" {
+#endif
+#include "EXTERN.h"
+#include "perl.h"
+#include "XSUB.h"
+#ifdef __cplusplus
+}
+#endif
+
+#define TnWIDTH		5
+#define TV_KEYD /**/
+#define TV_TEST /**/
+#define TV_STATS
+
+#define TV_PANIC		croak
+
+/* You should not call these directly. */
+#define NEW_TN(near)		tvmalloc(sizeof(TN))
+#define NEW_TCE(near,xx)	tvmalloc(sizeof(TCE)*xx)
+#define FREE_XPVTV(tv)		free(tv)
+#define FREE_XPVTC(tc)		free(tc)
+#define FREE_TN(tn)		free(tn)
+#define FREE_TCE(tce)		free(tce)
+
+#define TnDATA_T		SV*
+#define TV_PLANT_DAT(d)		*d = newSVsv(*d)
+#define TV_UPROOT_DAT(d)	SvREFCNT_dec(d)
+#ifdef TV_TEST
+#define TV_DAT_2STRING(d)	SvPV(d, na)
+#endif
+
+#define TcTV_T			SV*
+#define TC_DECLARE_MYTV		SV *xtc_tv;
+#define TcTV(tc)		((XPVTV*) SvIV((SV*)SvRV( (tc)->xtc_tv )))
+#define TC_INIT_MYTV(tc)	tc->xtc_tv = 0
+#define TC_SET_TV(tc,tv) \
+	SvREFCNT_inc(tv); \
+	if (tc->xtc_tv) SvREFCNT_dec(tc->xtc_tv); \
+	tc->xtc_tv = tv
+#define TC_UNSET_TV(tc)		SvREFCNT_dec(tc->xtc_tv)
+
+/* Edit as appropriate */
+#include "debtvpub.h"
+
+/* This cursor is used in tv_* methods which need a temporary cursor
+   to call tc_* methods.  Refcnts are not an issue because usage does
+   not span a single API call. */
+#define dTVREMOTE(tc,tv) \
+	if (!debtv_global_cursor) \
+	  debtv_global_cursor = init_tc((XPVTC*)tvmalloc(sizeof(XPVTC)), tv); \
+	tc = debtv_global_cursor; \
+	tc->xtc_tv = tv; \
+	tc_reset(tc)
+
+extern XPVTC *debtv_global_cursor;

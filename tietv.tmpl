@@ -1,0 +1,66 @@
+/* Be careful to only edit the *.tmpl file.  It's -*-C-*- source. */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+#include "EXTERN.h"
+#include "perl.h"
+#include "XSUB.h"
+#ifdef __cplusplus
+}
+#endif
+
+/* Tree node size.  Cannot be set at runtime since field offsets must
+   be compile time for performance.  Should be odd >= 3. */
+#define TnWIDTH		19
+
+/* Either use real keys or implied index locations. */
+#define TV_KEYD /**/
+
+/* Add extra fields to the structures that would normally be
+   provided by embedding & enables maximum assertions. */
+/* #define TV_TEST /**/
+#define TV_STATS
+#define TV_DUMP
+
+/* Make structures a multiple of 4 bytes. */
+/* #define TV_PAD32 /**/
+
+#define TV_PANIC		croak
+
+/* You should not call these directly. */
+#define NEW_TN(near)		(TN*) safemalloc(sizeof(TN))
+#define NEW_TCE(near,xx)	(TCE*) safemalloc(sizeof(TCE)*xx)
+#define FREE_XPVTV(tv)		free(tv)
+#define FREE_XPVTC(tc)		free(tc);
+#define FREE_TN(tn)		free(tn)
+#define FREE_TCE(tce)		free(tce)
+
+#define TnDATA_T		SV*
+#define TV_PLANT_DAT(d)		*d = newSVsv(*d)
+#define TV_UPROOT_DAT(d)	SvREFCNT_dec(d)
+#define TV_DAT_2STRING(d)	SvPV(d, na)
+
+#define TcTV_T			SV*
+#define TC_DECLARE_MYTV		SV *xtc_tv;
+#define TcTV(tc)		((XPVTV*) SvIV((SV*)SvRV( (tc)->xtc_tv )))
+#define TC_INIT_MYTV(tc)	tc->xtc_tv = 0
+#define TC_SET_TV(tc,tv) \
+	SvREFCNT_inc(tv); \
+	if (tc->xtc_tv) SvREFCNT_dec(tc->xtc_tv); \
+	tc->xtc_tv = tv
+#define TC_UNSET_TV(tc)		SvREFCNT_dec(tc->xtc_tv)
+
+#include "tietvpub.h"
+
+/* This cursor is used in tv_* methods which need a temporary cursor
+   to call tc_* methods.  Refcnts are not an issue because usage does
+   not span a single API call. */
+#define dTVREMOTE(tc,tv) \
+	if (!tietv_global_cursor) \
+	  tietv_global_cursor = init_tc((XPVTC*)safemalloc(sizeof(XPVTC)), tv); \
+	tc = tietv_global_cursor; \
+	tc->xtc_tv = tv; \
+	tc_reset(tc)
+
+extern XPVTC *tietv_global_cursor;

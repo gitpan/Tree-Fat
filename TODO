@@ -1,0 +1,43 @@
+TV_ESEEK_FDECL
+TV_ESEEK_LDECL
+TV_ESEEK_SETUP;
+TV_ESEEK_CMP(cmp, a, b);
+
+
+
+*** SCALING UP
+
+tree compression
+  fix delete with rotations
+  if TnFILL < TnWIDTH / 3 then stepnode to look for a merger
+
+tc_insert
+  try harder to find easy places to do insertions
+  bigger benchmarks
+
+rotation
+  investigate LL & RR splay style rotations
+
+tc_seek
+  OPTIMIZE!!  Can probably get keycmp number down 50-70%.
+
+fake-up a tied array API
+  push/unshift flags
+  pop/shift flags
+
+allow treefill/depth updates to be switched off temporarily
+  reduce the need for write locks == parallel insert mode!
+
+macros
+  run through a profiler
+  try memmove!
+  replace TnCALCDEPTH with something faster?
+  improve FREE macro?
+  store the TcSTAT names somewhere so we can nuke the #defines
+
+keep track nodes-per-subtree?
+
+factor out key/data independent methods into a common library
+
+split out ccovscan.pl
+
