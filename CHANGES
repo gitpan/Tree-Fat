@@ -3,14 +3,8 @@
 
 - Compiles with C++.
 
-- Re-designed the tree node.
-
 - Attempted to optimize the fill ratio.  tc_insert version 0.01 only
 used about 35% of the available slots!  After adding a bunch of
 kludges, I got it up to 65%.  Hm.  Need to re-think this.
 
 - Tightened constraints for cursor boundry conditions.
-
-- There seems little point in not caching the node treefill.  This
-option is now manditory.  For the same reason, tc_where has been
-retired.

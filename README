@@ -1,12 +1,4 @@
-WHAT IS A FAT-TREE?
-
-It's a cross between a tree and an array!  Each tree node contains a
-fixed length array of elements.  An F-Tree can be used as either type
-of data structure!  Tree performance is enhanced by balancing array
-operations with tree operations.  Tree operations are better optimized
-by taking arrays into account.  All array operations become O(log n)
-time.
-
+What is a Fat-Tree?  It's a cross between a tree and an array!
 
 Name           DSLI  Description                                  Info
 -----------    ----  -------------------------------------------- -----
@@ -44,11 +36,6 @@ Asymptotic performance is now respectable.
 
 - memmove & memcpy of slots used throughout (instead of assignment).
 Added more hooks for C++.  Fixed cpp (re)directives.
-
-
-** 01-01-98 RELEASE 0.03
-
-- First public release.
 
 
 Copyright © 1997-1998 Joshua Nathaniel Pritikin.  All rights reserved.

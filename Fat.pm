@@ -9,7 +9,7 @@ require AutoLoader;
 
 @ISA = qw(Exporter DynaLoader);
 @EXPORT = qw();
-$VERSION = '0.07';
+$VERSION = '0.08';
 
 bootstrap Tree::Fat $VERSION;
 
@@ -65,11 +65,9 @@ all-terrain performance.
 =head1 WHAT IS A FAT-TREE?
 
 It's a cross between a tree and an array!  Each tree node contains a
-fixed length array of elements.  An F-Tree can be used as either type
-of data structure!  Tree performance is enhanced by balancing array
-operations with tree operations.  Tree operations are better optimized
-by taking arrays into account.  All array operations become O(log n)
-time.
+fixed length array of slots.  Tree performance is enhanced by
+balancing array operations with tree operations.  Tree operations are
+better optimized by taking the arrays into account.
 
 =head1 HOW ABOUT PERSISTANCE?
 
@@ -102,6 +100,9 @@ instance of 'c': (a,b,*c,c,c,d,e).
 =back
 
 =head1 EMBEDDING API
+
+Flexibility is paramount.  The embedding API is much more flexible
+than would be possible with C++ templates.
 
 XXX
 
@@ -181,8 +182,7 @@ ratio.
 The source code is being released in a malleable form to encourage as
 much testing as possible.  Bugs in fundemental collections are simply
 UNACCEPTABLE and it is hard to trust a single vendor to debug their
-code properly.  (And worse to have each vendor do their own
-implementation!)
+code properly.
 
 Get it via http://www.perl.com/CPAN/authors/id/JPRIT/ !
 
