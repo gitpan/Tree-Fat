@@ -81,13 +81,12 @@ struct tce {
 };
 
 #ifndef TcTV
-/* Works, but ignores any refcnt issues... */
+/* Works, but ignores all refcnt issues... */
 #define TcTV_T			XPVTV*
 #define TC_DECLARE_MYTV		struct xpvtv *xtc_tv;
-#define TcTV(tc)		(tc)->xtc_tv
+#define TcTV(tc,tv)		tv = (tc)->xtc_tv
 #define TC_INIT_MYTV(tc)	(tc)->xtc_tv = 0
-#define TC_SET_TV(tc,tv)	TcTV(tc) = tv
-#define TC_UNSET_TV(tc)		TcTV(tc) = 0
+#define TC_UNSET_TV(tc)		(tc)->xtc_tv = 0
 #endif
 
 struct xpvtc {
@@ -138,7 +137,7 @@ void tv_delete(TcTV_T tv, TnKEY_T key);
 void tv_treestats(TcTV_T tv, double *depth, double *center);
 
 /*TV-REMOTE METHODS*/
-XPVTC *init_tc(XPVTC *tc, TcTV_T tv);
+XPVTC *init_tc(XPVTC *tc);
 void free_tc(XPVTC *tc);
 void tc_reset(XPVTC *tc);
 void tc_step(XPVTC *tc, I32 delta);
@@ -158,6 +157,9 @@ void tv_set_debug(int mask);
 void tc_dump(XPVTC *tc);
 void tv_dump(XPVTV *tv);
 
+#ifdef TV_ESEEK_FDECL
+TV_ESEEK_FDECL;
+#endif
 
 /*PRIVATE MACROS MAKING A PUBLIC APPEARANCE*/
 #define TvROOT(tv)		(tv)->xtv_root

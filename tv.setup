@@ -77,15 +77,14 @@ code for calculating interesting metrics. */
 */
 #endif
 
-/* Edit as appropriate */
-#include "MYPREFIX_tvpub.h"
+#include "tv.public"
 
 /* This cursor is used in tv_* methods which need a temporary cursor
    to call tc_* methods.  Refcnts are not an issue because usage does
    not span a single API call. */
 #define dTVREMOTE(tc,tv) \
 	if (!my_global_cursor) \
-	  my_global_cursor = init_tc((XPVTC*)tvmalloc(sizeof(XPVTC)), tv); \
+	  my_global_cursor = init_tc((XPVTC*)tvmalloc(sizeof(XPVTC))); \
 	tc = my_global_cursor; \
 	tc->xtc_tv = tv; \
 	tc_reset(tc)

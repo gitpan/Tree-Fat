@@ -251,7 +251,10 @@ new_cursor(THIS)
 	char *CLASS = "Tree::Fat::Test::Remote";
 	debXPVTC *tc;
 	PPCODE:
-	tc = debinit_tc((debXPVTC*) safemalloc(sizeof(debXPVTC)), THIS);
+	tc = debinit_tc((debXPVTC*) safemalloc(sizeof(debXPVTC)));
+	SvREFCNT_inc(THIS);
+	tc->xtc_tv = THIS;
+	debtc_reset(tc);
 	/*warn("new TC(%p) = %p\n", THIS, tc);/**/
 	XPUSHs(sv_setref_pv(sv_newmortal(), CLASS, tc));
 
@@ -300,7 +303,7 @@ debXPVTC::focus()
 	PREINIT:
 	char *CLASS = "Tree::Fat::Test";
 	CODE:
-	RETVAL = debTcTV(THIS);
+	debTcTV(THIS, RETVAL);
 	OUTPUT:
 	RETVAL
 
@@ -331,7 +334,11 @@ debXPVTC::moveto(...)
 	  else if (SvPOK(where)) {
 	    char *wh = SvPV(where, na);
 	    if (strEQ(wh, "start")) xto=-1;
-	    else if (strEQ(wh, "end")) xto=debTvFILL(debTcTV(THIS));
+	    else if (strEQ(wh, "end")) {
+	      debXPVTV *tv;
+	      debTcTV(THIS, tv);
+	      xto=debTvFILL(tv);
+	    }
 	  } else {
 	    croak("TC(%p)->moveto(): unknown location", THIS);
 	  }

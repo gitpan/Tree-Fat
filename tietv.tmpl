@@ -43,22 +43,18 @@ extern "C" {
 
 #define TcTV_T			SV*
 #define TC_DECLARE_MYTV		SV *xtc_tv;
-#define TcTV(tc)		((XPVTV*) SvIV((SV*)SvRV( (tc)->xtc_tv )))
+#define TcTV(tc,tv)		tv = ((XPVTV*) SvIV((SV*)SvRV( (tc)->xtc_tv )))
 #define TC_INIT_MYTV(tc)	tc->xtc_tv = 0
-#define TC_SET_TV(tc,tv) \
-	SvREFCNT_inc(tv); \
-	if (tc->xtc_tv) SvREFCNT_dec(tc->xtc_tv); \
-	tc->xtc_tv = tv
 #define TC_UNSET_TV(tc)		SvREFCNT_dec(tc->xtc_tv)
 
-#include "tietvpub.h"
+#include "tv.public"
 
 /* This cursor is used in tv_* methods which need a temporary cursor
    to call tc_* methods.  Refcnts are not an issue because usage does
    not span a single API call. */
 #define dTVREMOTE(tc,tv) \
 	if (!tietv_global_cursor) \
-	  tietv_global_cursor = init_tc((XPVTC*)safemalloc(sizeof(XPVTC)), tv); \
+	  tietv_global_cursor = init_tc((XPVTC*)safemalloc(sizeof(XPVTC))); \
 	tc = tietv_global_cursor; \
 	tc->xtc_tv = tv; \
 	tc_reset(tc)

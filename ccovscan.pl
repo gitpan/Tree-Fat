@@ -356,7 +356,7 @@ when to reset results cache.
 
 =head1 AUTHOR
 
-Copyright (c) 1997-1998 Joshua Nathaniel Pritikin.  All rights reserved.
+Copyright © 1997-1998 Joshua Nathaniel Pritikin.  All rights reserved.
 
 This package is free software and is provided "as is" without express
 or implied warranty.  It may be used, redistributed and/or modified

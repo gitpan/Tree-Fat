@@ -39,6 +39,7 @@ my %sym; {
 	}
     }
     $sym{'tv\.seek'} = "$opt{p}tvseek.ch";
+    $sym{'tv\.public'} = "$opt{p}tvpub.h";
 }
 
 my $conf_h = "./$opt{p}tv.tmpl";
@@ -70,6 +71,7 @@ for my $f (sort keys %fmap) {
 	$to->print("#define _TV_SNEAKY_ON_\n");
 	$to->print(qq{\#include "$opt{p}tvpriv.h"\n});
     }
+    $to->print("/* Line numbers are relative to the original (unrenamed) file! */\n");
     $to->print(qq{\#line 1\n});
     my $l = join('', $fh->getlines);
     while (my ($k,$v)=each %sym) {

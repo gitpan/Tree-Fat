@@ -76,10 +76,12 @@ tv_dump(XPVTV *tv)
 void
 tc_dump(XPVTC *tc)
 {
+  XPVTV *tv;
   int xa;
+  TcTV(tc,tv);
   printf("TC(0x%p) [%d/%d] focus=TV(0x%p) %s at %d %s%s%s\n",
 	 tc, TcFILL(tc), TcMAX(tc), 
-	 TcTV(tc), TcMATCH(tc)?"MATCH":"no match", TcPOS(tc),
+	 tv, TcMATCH(tc)?"MATCH":"no match", TcPOS(tc),
 	 TcMATCH(tc)? (TcFORWARD(tc)? "FORWARD":"BACKWARD") : "",
 	 TcSTART(tc)? " START":"",
 	 TcEND(tc)? " END":"");
@@ -199,9 +201,10 @@ tv_happy(XPVTV *tv)
 static I32
 tc_calcpos(XPVTC *tc)
 {
-  XPVTV *tv = TcTV(tc);
+  XPVTV *tv;
   int xa;
   I32 pos;
+  TcTV(tc,tv);
   if (TcFILL(tc) == 0) {
     if (TcSTART(tc)) return -1;
     if (TcEND(tc)) return TvFILL(tv);
@@ -241,8 +244,9 @@ tc_calcpos(XPVTC *tc)
 static int
 tc_happy(XPVTC *tc)
 {
-  XPVTV *tv = TcTV(tc);
+  XPVTV *tv;
   int xa;
+  TcTV(tc,tv);
   if (!tv_happy(tv)) {
     tc_dump(tc);
     return 0;
@@ -517,7 +521,8 @@ tc_extend(XPVTC *tc)
 void
 tc_reset(XPVTC *tc)
 {
-  XPVTV *tv = TcTV(tc);
+  XPVTV *tv;
+  TcTV(tc,tv);
   assert(tc);
   assert(tv);
   TcVERSION(tc) = TvVERSION(tv);
@@ -531,11 +536,10 @@ tc_reset(XPVTC *tc)
 }
 
 XPVTC *
-init_tc(XPVTC *tc, TcTV_T tv)
+init_tc(XPVTC *tc)
 {
   assert(tc);
   TC_INIT_MYTV(tc);
-  TC_SET_TV(tc,tv);
   TcFLAGS(tc) = 0;
 #ifdef TV_STATS
   SCOPE {
@@ -548,8 +552,8 @@ init_tc(XPVTC *tc, TcTV_T tv)
   TcMARGIN(tc) = TnDEFAULTMARGIN;
   TcMAX(tc) = 7;
   TcPATH(tc) = 0;
-  tc_settce(tc, NEW_TCE(tc,TcMAX(tc))); /*scale proportional to TvMAX? XXX*/
-  tc_reset(tc);
+  /* Cannot scale proportional to TvMAX because TV might not be set! */
+  tc_settce(tc, NEW_TCE(tc,TcMAX(tc)));
   return tc;
 }
 
@@ -581,8 +585,10 @@ tc_recalc_depth(XPVTC *tc)
 I32
 tc_pos(XPVTC *tc)
 {
+  XPVTV *tv;
   assert(tc);
-  TcSYNCCHECK(tc);
+  TcTV(tc,tv);
+  TcSYNCCHECK(tc,tv);
   assert(tc_happy(tc));
   if (TcMATCH(tc)) {
     return TcPOS(tc);
@@ -590,7 +596,7 @@ tc_pos(XPVTC *tc)
     return -1;
   } else if (TcEND(tc)) {
     return TcPOS(tc);
-  } else if (TcPOS(tc) == TvFILL(TcTV(tc))-1) { /*at END (no match)*/
+  } else if (TcPOS(tc) == TvFILL(tv)-1) { /*at END (no match)*/
     return TcPOS(tc)+1;
   } else {
     TV_PANIC("TV: attempt to get the position of an unpositioned cursor");
@@ -601,10 +607,13 @@ static int
 tc_stepnode(XPVTC *tc, I32 delta)
 {
   assert(tc);
-  TcSYNCCHECK(tc);
+  /*  TcSYNCCHECK(tc); assume caller already checked */
   DEBUG_step(warn("step node %d", delta));
   if (TcFILL(tc)==0) {
-    TN *tn = TvROOT(TcTV(tc));
+    XPVTV *tv;
+    TN *tn;
+    TcTV(tc,tv);
+    tn = TvROOT(tv);
     if (!tn) {
       return 0;
     } else if ((TcSTART(tc) && delta < 0) ||
@@ -773,7 +782,8 @@ tc_setnode(XPVTC *tc, int level, int top, TN *tn)
       }
     }
   } else {
-    XPVTV *tv = TcTV(tc);
+    XPVTV *tv;
+    TcTV(tc,tv);
     TvROOT(tv) = tn;
     assert(top);
   }
@@ -980,10 +990,10 @@ tc_insert(XPVTC *tc, TnDATA_T *data)
   assert(tc);
   TV_PLANT_KEY(key);
   TV_PLANT_DAT(data);
-  TcSYNCCHECK(tc);
+  TcTV(tc,tv);
+  TcSYNCCHECK(tc,tv);
   TcRSTAT(tc, TCS_INSERT, 1);
   assert(tc_happy(tc));
-  tv = TcTV(tc);
   if (TvEMPTY(tv)) {
     TCE *ce;
     tn = NEW_TN(tv);
@@ -1056,20 +1066,6 @@ tc_insert(XPVTC *tc, TnDATA_T *data)
   if (split) {
     tc_rotate(tc, 2);
   }
-}
-
-void
-tv_insert(TcTV_T tv, TnKEY_T key, TnDATA_T *data)
-{
-  XPVTC *tc;
-  dTVREMOTE(tc,tv);
-  TV_SETREMOTE(tc,key);
-  END_SCOPE
-#ifdef TV_KEYD
-  tc_insert(tc, key, data);
-#else
-  tc_insert(tc, data);
-#endif
 }
 
 /* this can be removed once delete is fixed XXX */
@@ -1176,10 +1172,10 @@ tc_delete(XPVTC *tc)
   if (!TcMATCH(tc)) {
     return;
   }
-  TcSYNCCHECK(tc);
+  TcTV(tc,tv);
+  TcSYNCCHECK(tc,tv);
   TcRSTAT(tc, TCS_DELETE, 1);
   assert(tc_happy(tc));
-  tv = TcTV(tc);
   tn = TcTNx(tc);
   slot = TcSLOTx(tc);
   TV_UPROOT_KEY(TnKEYx(tn,slot));
@@ -1228,6 +1224,22 @@ tc_delete(XPVTC *tc)
   assert(tc_happy(tc));
 }
 
+#ifdef dTVREMOTE
+
+void
+tv_insert(TcTV_T tv, TnKEY_T key, TnDATA_T *data)
+{
+  XPVTC *tc;
+  dTVREMOTE(tc,tv);
+  TV_SETREMOTE(tc,key);
+  END_SCOPE
+#ifdef TV_KEYD
+  tc_insert(tc, key, data);
+#else
+  tc_insert(tc, data);
+#endif
+}
+
 void
 tv_delete(TcTV_T tv, TnKEY_T key)
 {
@@ -1250,6 +1262,8 @@ tv_fetch(TcTV_T tv, TnKEY_T key, TnDATA_T *out)
 #endif
   return got != 0;
 }
+
+#endif /* dTVREMOTE */
 
 static void
 tn_clear(TN *tn)
@@ -1286,7 +1300,7 @@ tv_clear(XPVTV *tv)
 void
 tc_moveto(XPVTC *tc, I32 xto)
 {
-  XPVTV *tv = TcTV(tc);
+  XPVTV *tv;
   TCE *ce;
   TN *tn, *down;
   int xa;
@@ -1294,6 +1308,7 @@ tc_moveto(XPVTC *tc, I32 xto)
   int tree;
 
   assert(tc);
+  TcTV(tc,tv);
   if (TvFILL(tv) == 0) {
     tc_reset(tc);
     return;
@@ -1357,6 +1372,14 @@ tc_moveto(XPVTC *tc, I32 xto)
 }
 
 #ifdef TV_ESEEK_FDECL
+
+#ifndef TV_ESEEK_LDECL
+#define TV_ESEEK_LDECL
+#endif
+#ifndef TV_ESEEK_SETUP
+#define TV_ESEEK_SETUP
+#endif
+
 #define TC_SEEK_FDECL TV_ESEEK_FDECL
 #define TC_SEEK_LDECL TV_ESEEK_LDECL
 #define TC_SEEK_SETUP TV_ESEEK_SETUP
@@ -1376,8 +1399,10 @@ int tc_seek(XPVTC *tc, TnKEY_T key)
 void
 tc_step(XPVTC *tc, I32 delta)
 {
+  XPVTV *tv;
   assert(tc);
-  TcSYNCCHECK(tc);
+  TcTV(tc,tv);
+  TcSYNCCHECK(tc,tv);
   assert(tc_happy(tc));
   if (delta==0) {
     TV_PANIC("TV: cannot step by zero elements");
@@ -1464,7 +1489,7 @@ tc_step(XPVTC *tc, I32 delta)
   if (TcFILL(tc) == 0) {
     TcMATCH_off(tc);
     if (TcFORWARD(tc)) {
-      TcPOS(tc) = TvFILL(TcTV(tc));
+      TcPOS(tc) = TvFILL(tv);
       TcEND_on(tc);
     } else {
       TcPOS(tc) = -1;
@@ -1479,11 +1504,13 @@ tc_step(XPVTC *tc, I32 delta)
 TnKEY_T
 tc_fetch(XPVTC *tc, TnDATA_T *out)
 {
+  XPVTV *tv;
   assert(tc);
   if (!TcMATCH(tc)) {
     return 0;
   }
-  TcSYNCCHECK(tc);
+  TcTV(tc,tv);
+  TcSYNCCHECK(tc,tv);
   assert(tc_happy(tc));
   SCOPE {
     TN *tn = TcTNx(tc);
@@ -1500,13 +1527,15 @@ tc_fetch(XPVTC *tc, TnDATA_T *out)
 void
 tc_store(XPVTC *tc, TnDATA_T *data)
 {
+  XPVTV *tv;
   TN *tn;
   int slot;
   assert(tc);
   if (!TcMATCH(tc)) {
     TV_PANIC("TV: attempt to store through an unset cursor(0x%p)", tc);
   }
-  TcSYNCCHECK(tc);
+  TcTV(tc,tv);
+  TcSYNCCHECK(tc,tv);
   assert(tc_happy(tc));
   tn = TcTNx(tc);
   slot = TcSLOTx(tc);
@@ -1528,11 +1557,12 @@ tc_bseek(XPVTC *tc, TnKEY_T key)
 #ifdef TV_STATS
 
 void
-tv_treestats(TcTV_T tv, double *depth, double *center)
+tv_treestats(TcTV_T xtv, double *depth, double *center)
 {
   int nodes=0;
   XPVTC *tc;
-  dTVREMOTE(tc,tv);
+  XPVTV *tv;
+  dTVREMOTE(tc,xtv);
 
   *depth = *center = 0;
   tc_reset(tc);
@@ -1543,7 +1573,8 @@ tv_treestats(TcTV_T tv, double *depth, double *center)
     ++nodes;
   }
   TcRSTAT(tc, TCS_STEPNODE, -nodes);
-  *depth /= TvFILL(TcTV(tc));
+  TcTV(tc,tv);
+  *depth /= TvFILL(tv);
   *center /= nodes;
 }
 
@@ -1598,7 +1629,7 @@ tv_treestats(TcTV_T tv, double *depth, double *center)
 
 
 /*
-Copyright (c) 1997-1998 Joshua Nathaniel Pritikin.  All rights reserved.
+Copyright © 1997-1998 Joshua Nathaniel Pritikin.  All rights reserved.
 
 This package is free software and is provided "as is" without express
 or implied warranty.  It may be used, redistributed and/or modified

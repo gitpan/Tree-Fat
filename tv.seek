@@ -4,10 +4,10 @@ This is the number-one most heavily executed method.  OPTIMIZE!!
 
 Use these macros to declare your own seek method:
 
-TV_ESEEK_FDECL
-TV_ESEEK_LDECL
-TV_ESEEK_SETUP;
-TV_ESEEK_CMP(cmp, key, dat);
+  TV_ESEEK_FDECL
+  TV_ESEEK_LDECL
+  TV_ESEEK_SETUP
+  TV_ESEEK_CMP(cmp, key, dat);
 
 Obviously, it would be impolite to change any variable names or
 calling convensions below.  These changes will be minimized.
@@ -27,7 +27,7 @@ TC_SEEK_FDECL
 
   assert(tc);
   tc_reset(tc);
-  tv = TcTV(tc);
+  TcTV(tc,tv);
   tn = TvROOT(tv);
   if (!tn) {
     return 0;

@@ -9,7 +9,7 @@ require AutoLoader;
 
 @ISA = qw(Exporter DynaLoader);
 @EXPORT = qw();
-$VERSION = '0.03';
+$VERSION = '0.04';
 
 bootstrap Tree::Fat $VERSION;
 
@@ -60,6 +60,10 @@ derived from the principle of least-surprise (rather than efficiency).
 Both cursors and trees store a version number.  If you modify the same
 tree with more than one cursor, you can get mismatched versions.  If
 there is a mismatch, an exception is thrown.
+
+If you allow duplicate keys, seek always returns the first key that
+matches.  For example, the cursor will match at the first instance of
+'c': (a,b,*c,c,c,d,e).
 
 Complete cursor behavior ridiculously complicated and cannot be
 explained in one sentence.  The method C<tc_happy> in C<tv.code> gives
@@ -172,7 +176,7 @@ Get it at http://www.perl.com/CPAN/authors/id/JPRIT/!
 
 =head1 AUTHOR
 
-Copyright (c) 1997-1998 Joshua Nathaniel Pritikin.  All rights reserved.
+Copyright © 1997-1998 Joshua Nathaniel Pritikin.  All rights reserved.
 
 This package is free software and is provided "as is" without express
 or implied warranty.  It may be used, redistributed and/or modified

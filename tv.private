@@ -161,9 +161,9 @@ STMT_START {							\
 #define TvPARALLEL_off(tv)	(TvFLAGS(tv) &= ~TVptv_PARALLEL)
 
 #define TcVERSION(tc)		(tc)->xtc_version
-#define TcSYNCCHECK(tc) \
-	if (TcVERSION(tc) != TvVERSION(TcTV(tc))) \
-	  TV_PANIC("TV: cursor(0x%p) out of sync with tree(0x%p)", tc,TcTV(tc));
+#define TcSYNCCHECK(tc,tv) \
+	if (TcVERSION(tc) != TvVERSION(tv)) \
+	  TV_PANIC("TV: cursor(0x%p) out of sync with tree(0x%p)", tc,tv);
 #define TcMARGIN(tc)		(tc)->xtc_margin
 #define TcPATH(tc)		(tc)->xtc_path
 #define TcFILL(tc)		(tc)->xtc_fill

@@ -35,12 +35,8 @@ extern "C" {
 
 #define TcTV_T			SV*
 #define TC_DECLARE_MYTV		SV *xtc_tv;
-#define TcTV(tc)		((XPVTV*) SvIV((SV*)SvRV( (tc)->xtc_tv )))
+#define TcTV(tc,tv)		tv = ((XPVTV*) SvIV((SV*)SvRV( (tc)->xtc_tv )))
 #define TC_INIT_MYTV(tc)	tc->xtc_tv = 0
-#define TC_SET_TV(tc,tv) \
-	SvREFCNT_inc(tv); \
-	if (tc->xtc_tv) SvREFCNT_dec(tc->xtc_tv); \
-	tc->xtc_tv = tv
 #define TC_UNSET_TV(tc)		SvREFCNT_dec(tc->xtc_tv)
 
 /* Edit as appropriate */
@@ -51,7 +47,7 @@ extern "C" {
    not span a single API call. */
 #define dTVREMOTE(tc,tv) \
 	if (!debtv_global_cursor) \
-	  debtv_global_cursor = init_tc((XPVTC*)tvmalloc(sizeof(XPVTC)), tv); \
+	  debtv_global_cursor = init_tc((XPVTC*)tvmalloc(sizeof(XPVTC))); \
 	tc = debtv_global_cursor; \
 	tc->xtc_tv = tv; \
 	tc_reset(tc)
