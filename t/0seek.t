@@ -60,7 +60,12 @@ sub seek_test {
 	    die $t if ($c->fetch())[1] ne $all[$t];
 	}
     }
-    ok(1);
+    ok 1;
+
+    # preliminary
+    ok $c->seek('ab'), 1;
+    ok $c->seek('ab!'), 0;
+    ok !defined $c->fetch(), 1;
 }
 
 # incomplete XXX

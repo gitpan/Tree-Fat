@@ -37,6 +37,7 @@ TC_SEEK_FDECL
   if (!tn) {
     return 0;
   }
+  TcMATCH_off(tc);
   TcSTARTEND_off(tc);
   TcFORWARD_on(tc);
   TcPOS(tc) = 0;

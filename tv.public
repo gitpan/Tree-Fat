@@ -21,7 +21,7 @@
 #define TnFETCHDATA_T TnDATA_T**
 #endif
 
-#ifdef TV_TEST
+#if defined(TV_TEST) && defined(TV_XTEST)
 #define dGUARD(xx)	U32 guard##xx;
 #else
 #define dGUARD(xx)
@@ -46,7 +46,7 @@ struct tnslot {
 struct tn {
   dTYPESPEC( TN )
   struct tn0	n0;
-#ifdef TV_TEST
+#if defined(TV_TEST) && defined(TV_XTEST)
   U32		tn_scanid;
 #endif
   dGUARD(1)

@@ -56,7 +56,8 @@ TnLEFT_set(tn,left); TnRIGHT_set(tn,right); \
 #define TcTN(tc,xx)	((TN*)(tc)->xtc_path[xx].tce_tn)
 
 #define TnGUARD(tn,xx)	((TN*)tn)->guard##xx
-#ifdef TV_TEST
+
+#if defined(TV_TEST) && defined(TV_XTEST)
 #define TnSCANID(tn)	((TN*)tn)->tn_scanid
 #define TnINITGUARD(tn)	\
 	TnGUARD(tn,1)=0xbadc0de;\
@@ -65,20 +66,35 @@ TnLEFT_set(tn,left); TnRIGHT_set(tn,right); \
 #define TnGUARDOK(tn) \
 	(TnGUARD(tn,1)==0xbadc0de && \
 	 TnGUARD(tn,2)==0xbadc0de)
+
+#else
+#define TnSCANID(tn)
+#define TnINITGUARD(tn)
+#define TnGUARDOK(tn)
+#endif
+
+#ifdef TV_TEST
+#  ifdef TV_KEYD
+#    define TnSNIF1SLOT(tn,sx) \
+(TnDAT(tn,_x) == (void*)0xbadc0de || TnKEY(tn,_x) == (char*)0xbadc0de)
+#  else
+     /* assumes that sizeof(TnDAT) >= sizeof(void*) */
+#    define TnSNIF1SLOT(tn,sx) \
+(*(void**)&TnDAT(tn,_x) == (void*)0xbadc0de)
+#  endif
+
 #define TnSNIFGUARD(tn)				\
 STMT_START {					\
   int _x;					\
   for (_x=0; _x < TnWIDTH; _x++) {		\
-    if (TnDAT(tn,_x) == (void*)0xbadc0de ||	\
-	TnKEY(tn,_x) == (char*)0xbadc0de) {	\
+    if (TnSNIF1SLOT(tn,_x)) {			\
       warn("snifguard failed at %d", _x);	\
       assert(0);				\
     }						\
   }						\
 } STMT_END
+
 #else
-#define TnSCANID(tn)
-#define TnINITGUARD(tn)
 #define TnSNIFGUARD(tn) STMT_START {} STMT_END
 #endif
 

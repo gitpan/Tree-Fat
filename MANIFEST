@@ -34,3 +34,4 @@ tvcommon.c
 tvcommon.h
 tvgen.pl
 typemap
+.psrc

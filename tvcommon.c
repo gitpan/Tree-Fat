@@ -80,7 +80,7 @@ tc_extend(XPVTC *tc)
   TCE *ce2;
   assert(tc);
   TcMAX(tc) += 7;		/* cursors already grow exponentially */
-  ce2 = NEW_TCE(tc, TcMAX(tc));
+  NEW_TCE(ce2, tc, TcMAX(tc));
   /*  Copy(TcPATH(tc), ce2, TcFILL(tc), TCE); /* Copy is a perl macro! XXX */
   memcpy(ce2, TcPATH(tc), TcFILL(tc)*sizeof(TCE));
   tc_settce(tc, ce2);
@@ -112,6 +112,7 @@ tc_refocus(XPVTC *tc, XPVTV *tv)
 XPVTC *
 init_tc(XPVTC *tc)
 {
+  TCE *tce2;
   assert(tc);
   TcTV(tc) = 0;
   TcFLAGS(tc) = 0;
@@ -127,7 +128,8 @@ init_tc(XPVTC *tc)
   TcMAX(tc) = 7;
   TcPATH(tc) = 0;
   /* Cannot scale proportional to TvMAX because TV might not be set! */
-  tc_settce(tc, NEW_TCE(tc,TcMAX(tc)));
+  NEW_TCE(tce2, tc,TcMAX(tc));
+  tc_settce(tc, tce2);
   return tc;
 }
 

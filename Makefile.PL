@@ -13,8 +13,12 @@ if ($testmode) {
     warn "...setting symlinks for testing\n";
     symlink "setup/tv.test", "tietv.tmpl";
     symlink "setup/tvcommon0.test", "tvcommon0.h";
-    push(@OBJ, qw(cover1.o cover2.o ccov_registry.o));
-    push(@PREREQ, 'Devel::CCov' => 0.08, 'Time::HiRes' => '01.16');
+    if (0) {
+	push(@OBJ, qw(cover1.o cover2.o ccov_registry.o));
+	push(@PREREQ, 'Devel::CCov' => 0.08, 'Time::HiRes' => '01.16');
+    } else {
+	push(@OBJ, qw(tietv.o tvcommon.o));
+    }
     push(@FLAGS, '-g');
 } else {
     warn "...setting symlinks for launch\n";
@@ -23,26 +27,22 @@ if ($testmode) {
     push(@OBJ, qw(tietv.o tvcommon.o));
 }
 
-my $prof = '-fprofile-arcs -ftest-coverage';
+#my $prof = '-fprofile-arcs -ftest-coverage';
 
 WriteMakefile(
 	      NAME		=> 'Tree::Fat',
 	      PREREQ_PM		=> { Test => 0.08, @PREREQ },
 	      EXE_FILES		=> [qw(tvgen.pl)],
-	      OPTIMIZE		=> join(' ', '-O2', '-I.', @FLAGS),
+	      OPTIMIZE		=> join(' ', '-I.', @FLAGS),
 
 	      VERSION_FROM	=> 'Fat.pm',
+#	      CC => "insure",
 	      OBJECT		=> join(' ', qw(Fat.o), @OBJ),
 	      PM		=> { 
 				    'Fat.pm' => '$(INST_LIBDIR)/Fat.pm',
 				    (map { $_=>'$(INST_LIBDIR)/Fat/'.$_ } @tvlib)
 				   },
               dist		=> {COMPRESS=>'gzip -9f', SUFFIX => 'gz'},
-	      macro		=> { 
-				    #MAP_LINKCMD
-      PURIFY => '/usr/local/bin/purify -always-use-cache-dir -cache-dir=/tmp/pure $(CC)', 
-      QUANTIFY => 'quantify -always-use-cache-dir -cache-dir=/tmp/pure $(CC)',
-				   },
 );
 
 sub MY::postamble {

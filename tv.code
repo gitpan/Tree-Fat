@@ -47,6 +47,7 @@ tn_dump(TN *tn, int tcslot, int level)
       if (level >= 0) {
 	if (TnSUBl(tn,xa)) tn_dump(TnSUBl(tn,xa), -2, level+2);
 	if (xa < TnFILL(tn)) {
+#ifdef TV_KEYD
 	  char *key = TnKEYx(tn,xa);
 	  if (key == (char*) 0x69696969) {
 	    printf("%s%ckey=BROKEN\n", indent, ctcslot);
@@ -54,9 +55,14 @@ tn_dump(TN *tn, int tcslot, int level)
 	    printf("%s%ckey=%s dat='%s' (%p)\n", indent, ctcslot,
 		   key, TV_DAT_2STRING(TnDATx(tn,xa)), TnDATx(tn,xa));
 	  }
+#else
+	  printf("%s%cdat='%s' (%p)\n", indent, ctcslot,
+		 TV_DAT_2STRING(TnDATx(tn,xa)), TnDATx(tn,xa));
+#endif
 	}
       } else {
 	if (xa < TnFILL(tn)) {
+#ifdef TV_KEYD
 	  char *key = TnKEYx(tn,xa);
 	  if (key == (char*) 0x69696969) {
 	    printf("%s%ckey=BROKEN\n", indent, ctcslot);
@@ -65,6 +71,11 @@ tn_dump(TN *tn, int tcslot, int level)
 		   key, TV_DAT_2STRING(TnDATx(tn,xa)),
 		   TnSUBl(tn,xa), TnSUBr(tn,xa));
 	  }
+#else
+	  printf("%s%cdat='%s' left=%x right=%x\n", indent, ctcslot,
+		 TV_DAT_2STRING(TnDATx(tn,xa)),
+		 TnSUBl(tn,xa), TnSUBr(tn,xa));
+#endif
 	}
       }
     }
@@ -135,9 +146,11 @@ static int
 tn_emptied(TN *tn)
 {
   int xa;
+#ifdef TV_KEYD
   for (xa = 0; xa < TnWIDTH; xa++) {
     if (TnKEY(tn,xa) != (void*) 0x69696969) return 0;
   }
+#endif
   return 1;
 }
 
@@ -151,10 +164,12 @@ tn_happy0(TN *tn)
   if (!(TnEND(tn) >= TnSTART(tn) && TnEND(tn) <= TnWIDTH)) {
     warn("TN(%p): TnEND=%d", tn, TnEND(tn)); return 0;
   }
+#ifdef TV_XTEST
   if (!TnGUARDOK(tn)) {
     warn("TN(%p): guard breached", tn);
     return 0;
   }
+#endif
   if (1) {
     int fill = TnFILL(tn);
     if (TnLEFT(tn))  fill += TnTREEFILL(TnLEFT(tn));
@@ -164,6 +179,7 @@ tn_happy0(TN *tn)
       return 0;
     }
   }
+#ifdef TV_KEYD
   for (xa=0; xa < TnSTART(tn); xa++) {
     if (TnKEY(tn,xa) != (char*) 0x69696969) {
       tn_dump(tn, -2, 0);
@@ -185,6 +201,7 @@ tn_happy0(TN *tn)
       return 0;
     }
   }
+#endif
   return 1;
 }
 
@@ -193,11 +210,13 @@ tn_happy(TN *tn, U32 scanid)
 {
   int depth;
   int treefill;
+#ifdef TV_XTEST
   if (TnSCANID(tn) == scanid) {
     warn("TN(%p) seems to be in the tree twice!", tn);
     return 0;
   }
   TnSCANID(tn) = scanid;
+#endif
   if (!tn_happy0(tn)) return 0;
   if (TnLEFT(tn)) {
     if (!tn_happy(TnLEFT(tn), scanid)) return 0;
@@ -470,6 +489,7 @@ tc_happy(XPVTC *tc)
   return 1;
 }
 
+#ifdef TV_KEYD
 static int
 tc_atkey(XPVTC *tc, char *key)
 {
@@ -480,6 +500,7 @@ tc_atkey(XPVTC *tc, char *key)
   }
   return 1;
 }
+#endif
 
 static int
 tn_treefill(TN *tn, int depth, int *maxdepth)
@@ -604,7 +625,7 @@ tc_insert(XPVTC *tc, TnSTOREDATA_T data)
   if (TvEMPTY(tv)) {
     TCE *ce;
     assert(TnWIDTH >= 5);
-    tn = NEW_TN(tv);
+    NEW_TN(tn, tv);
     TnINIT(tn, 1, 0, 0);
     TnINITGUARD(tn);
     TnSETSLOT(tn,TnSTART(tn),key,data);
@@ -672,7 +693,7 @@ tc_insert(XPVTC *tc, TnSTOREDATA_T data)
     if (1) {
       /* If the next/previous node has lots of space, recenter the
 	 elements between the two nodes and avoid a split.
-	 Is it worth check both forward & back? XXX
+	 Is it worth it to check both forward & backward? XXX
       */
       int dir = slot <= TnMIDDLE ? -1 : 1;
       TcFORWARD_on(tc);
@@ -711,7 +732,8 @@ tc_insert(XPVTC *tc, TnSTOREDATA_T data)
     }/**/
     /* add another node :-( */
     if (slot > TnWIDTH/2) {
-      TN *right = NEW_TN(tn);
+      TN *right;
+      NEW_TN(right, tn);
       TnINIT(right,0,0,TnRIGHT(tn));
       TnINITGUARD(right);
       TnRIGHT_set(tn, right);
@@ -719,7 +741,8 @@ tc_insert(XPVTC *tc, TnSTOREDATA_T data)
       tn_recalc(tc,(TN0*)right);
       assert(tn_happy0(right));
     } else {
-      TN *left = NEW_TN(tn);
+      TN *left;
+      NEW_TN(left, tn);
       TnINIT(left,0,TnLEFT(tn),0);
       TnINITGUARD(left);
       TnLEFT_set(tn, left);

@@ -7,7 +7,7 @@
 /* Either use real keys or implied index locations. */
 #define TV_KEYD /**/
 
-#define NEW_TN(near)		(TN*) safemalloc(sizeof(TN))
+#define NEW_TN(ret, near)	ret = (TN*) safemalloc(sizeof(TN))
 
 #define TnDATA_T		SV*
 #define TV_PLANT_DAT(d)		*d = newSVsv(*d)

@@ -31,6 +31,6 @@ code for calculating interesting metrics. */
 #define FREE_TN(tn)		free(tn)
 
 /* You should not call these directly */
-#define NEW_TCE(near,xx)	(TCE*) safemalloc(sizeof(TCE)*xx)
+#define NEW_TCE(ret, near,xx)	ret = (TCE*) safemalloc(sizeof(TCE)*xx)
 #define FREE_TCE(tce)		free(tce)
 
