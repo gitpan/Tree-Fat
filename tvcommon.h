@@ -291,7 +291,7 @@ void tc_refocus(XPVTC *tc, XPVTV *tv);
 void tc_reset(XPVTC *tc);
 I32 tc_pos(XPVTC *tc);
 void tc_moveto(XPVTC *tc, I32 xto);
-void tc_step(XPVTC *tc, I32 delta);
+int tc_step(XPVTC *tc, I32 delta);
 
 #ifdef TV_DEBUG
 void tv_set_debug(int mask);

@@ -1,5 +1,5 @@
 use Test;  #-*-perl-*-
-BEGIN { todo test => 5 }
+BEGIN { todo test => 10 }
 
 use strict;
 use Tree::Fat;
@@ -65,20 +65,25 @@ sub seek_test {
 
 # incomplete XXX
 sub seek2_test {
+    my ($class, $unique) = @_;
     my $o = shift->new;
     $o->clear;
     my $c = $o->new_cursor;
     for (qw/b b c/) { $o->insert($_,$_) }
     $c->seek('b');
     $c->step(-1);
-    ok($c->pos() == -1);
+    skip($unique, sub { $c->pos() == -1 });
 
     $o->insert('a','a');
     $c->seek('b');
     $c->step(-1);
-    ok(($c->fetch())[1] eq 'a');
+    skip($unique, sub { ($c->fetch())[1] eq 'a' });
 }
 
 my $tv = 'Tree::Fat';
-seek_test($tv);
-seek2_test($tv);
+for my $u (0..1) {
+    $tv->unique($u);
+    seek_test($tv);
+    seek2_test($tv, $u);
+}
+

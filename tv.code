@@ -905,8 +905,8 @@ tv_clear(XPVTV *tv)
 
 #ifdef TV_KEYD
 #define TC_SEEK_FDECL \
-int tc_seek(XPVTC *tc, TnKEY_T key)
-#define TC_SEEK_LDECL int unique=0;
+int tc_seek(XPVTC *tc, TnKEY_T key, int unique)
+#define TC_SEEK_LDECL
 #define TC_SEEK_SETUP
 #define TC_SEEK_CMP(cmp,k,d) TV_KEYCMP(cmp,key,k)
 #include "tv.seek"

@@ -68,7 +68,7 @@ void tv_clear(XPVTV *tv);
 TnKEY_T tc_fetch(XPVTC *tc, TnFETCHDATA_T out);
 void tc_store(XPVTC *tc, TnSTOREDATA_T data);
 #ifdef TV_KEYD
-int tc_seek(XPVTC *tc, TnKEY_T key);
+int tc_seek(XPVTC *tc, TnKEY_T key, int unique);
 void tc_insert(XPVTC *tc, TnKEY_T key, TnSTOREDATA_T data);
 #else
 void tc_insert(XPVTC *tc, TnSTOREDATA_T data);

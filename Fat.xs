@@ -1,6 +1,7 @@
 #include "tietv.h"
 
 XPVTC *tv_global;
+static int Unique=1;
 
 MODULE = Tree::Fat		PACKAGE = Tree::Fat
 
@@ -15,6 +16,13 @@ debug(mask)
 	int mask
 	CODE:
 	tv_set_debug(mask);
+
+void
+unique(CLASS, un)
+	char *CLASS
+	int un;
+	CODE:
+	Unique = un;
 
 void
 new(CLASS)
@@ -38,7 +46,7 @@ XPVTV::FETCH(key)
 	CODE:
 	tc_refocus(tv_global, THIS);
 	RETVAL = &sv_undef;
-	if (tietc_seek(tv_global, key)) {
+	if (tietc_seek(tv_global, key, Unique)) {
 	  key = tietc_fetch(tv_global, &out);
 	  RETVAL = *out;
 	}
@@ -52,7 +60,7 @@ XPVTV::insert(key, data)
 	SV *data
 	CODE:
 	tc_refocus(tv_global, THIS);
-	tietc_seek(tv_global, key);
+	tietc_seek(tv_global, key, Unique);
 	tietc_insert(tv_global, key, &data);
 	tc_refocus(tv_global, 0);
 
@@ -64,7 +72,7 @@ XPVTV::STORE(key, val)
 	XPVTC *tc = tv_global;
 	CODE:
 	tc_refocus(tc,THIS);
-	if (tietc_seek(tc,key)) {
+	if (tietc_seek(tc,key, Unique)) {
 	  tietc_store(tc,&val);
 	} else {
 	  tietc_insert(tc,key,&val);
@@ -76,7 +84,7 @@ XPVTV::DELETE(key)
 	char *key
 	CODE:
 	tc_refocus(tv_global, THIS);
-	tietc_seek(tv_global, key);
+	tietc_seek(tv_global, key, Unique);
 	tietc_delete(tv_global);
 	tc_refocus(tv_global, 0);
 
@@ -112,7 +120,7 @@ XPVTV::EXISTS(key)
 	XPVTC *tc = tv_global;
 	CODE:
 	tc_refocus(tc, THIS);
-	RETVAL = tietc_seek(tc,key);
+	RETVAL = tietc_seek(tc,key, Unique);
 	tc_refocus(tc, 0);
 	OUTPUT:
 	RETVAL
@@ -140,7 +148,7 @@ XPVTV::NEXTKEY(lastkey)
 	CODE:
 	tc_refocus(tc, THIS);
 	/* Can perl help manage cursors please?! XXX */
-	tietc_seek(tc,lastkey);
+	tietc_seek(tc,lastkey, Unique);
 	tc_step(tc,1);
 	RETVAL = tietc_fetch(tc, &out);
 	tc_refocus(tc, 0);
@@ -320,7 +328,7 @@ int
 XPVTC::seek(key)
 	char *key
 	CODE:
-	RETVAL = tietc_seek(THIS, key);
+	RETVAL = tietc_seek(THIS, key, Unique);
 	OUTPUT:
 	RETVAL
 

@@ -94,7 +94,7 @@ TC_SEEK_FDECL
 
     /*    warn("cmp = %d", cmp);/**/
     if (unique && cmp == 0) {
-      TcSLOT(tc) = xm - xl;
+      TcSLOT(tc) = xm - TnSTART(tn);
       TcPOS(tc) += TcSLOT(tc);
       TcMATCH_on(tc);
       goto DONE;

@@ -9,7 +9,7 @@ require AutoLoader;
 
 @ISA = qw(Exporter DynaLoader);
 @EXPORT = qw();
-$VERSION = '0.08';
+$VERSION = '0.09';
 
 bootstrap Tree::Fat $VERSION;
 
@@ -73,7 +73,7 @@ better optimized by taking the arrays into account.
 
 F-Trees are designed for embedding.  (If you want I<persistent>
 F-Trees without the work, then check out the C<ObjStore> extension by
-the same author.  They are already integrated into the ObjectStore
+the same author.  F-Trees are already integrated into the ObjectStore
 database, right now!)
 
 =head1 CURSOR BEHAVIOR

@@ -1,5 +1,5 @@
 use Test;  #-*-perl-*-
-BEGIN { todo test => 8 }
+BEGIN { todo test => 16 }
 
 use Tree::Fat;
 
@@ -33,4 +33,8 @@ sub easy_test {
     undef $@;
 }
 
-easy_test('Tree::Fat');
+my $t = 'Tree::Fat';
+easy_test($t);
+$t->unique(0);
+easy_test($t);
+

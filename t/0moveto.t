@@ -1,5 +1,5 @@
 use Test;  #-*-perl-*-
-BEGIN { todo test => 2 }
+BEGIN { todo test => 4 }
 
 use Tree::Fat;
 
@@ -53,5 +53,9 @@ sub step_test {
 }
 
 my $tv = 'Tree::Fat';
+moveto_test($tv);
+step_test($tv);
+
+$tv->unique(0);
 moveto_test($tv);
 step_test($tv);

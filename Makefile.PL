@@ -10,14 +10,14 @@ my @tvlib = (qw/tv.code tv.seek tv.private tv.public tv.sym tv.setup
 @FLAGS = ();
 unlink "tietv.tmpl", "tvcommon0.h";
 if ($testmode) {
-    warn "Setting symlinks for testing...\n";
+    warn "...setting symlinks for testing\n";
     symlink "setup/tv.test", "tietv.tmpl";
     symlink "setup/tvcommon0.test", "tvcommon0.h";
     push(@OBJ, qw(cover1.o cover2.o ccov_registry.o));
-    push(@PREREQ, 'Devel::CCov' => 0.08, 'Time::HiRes' => '01.16');
+    push(@PREREQ, 'Test' => 0.04, 'Devel::CCov' => 0.08, 'Time::HiRes' => '01.16');
     push(@FLAGS, '-g');
 } else {
-    warn "Setting symlinks for launch...\n";
+    warn "...setting symlinks for launch\n";
     symlink "setup/tv.prod", "tietv.tmpl";
     symlink "setup/tvcommon0.prod", "tvcommon0.h";
     push(@OBJ, qw(tietv.o tvcommon.o));

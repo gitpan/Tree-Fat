@@ -637,7 +637,7 @@ tc_moveto(XPVTC *tc, I32 xto)
   /* no match at the right most */
 }
 
-void
+int
 tc_step(XPVTC *tc, I32 delta)
 {
   XPVTV *tv;
@@ -653,7 +653,7 @@ tc_step(XPVTC *tc, I32 delta)
     TN0 *tn;
     int dir = delta < 0 ? -1 : 1;
     if (!tc_stepnode(tc, dir)) {
-      return;
+      return 0;
     }
     tn = TcTNx(tc);
     TcSLOT(tc) = delta > 0 ? 0 : TnFILL(tn)-1;
@@ -735,8 +735,10 @@ tc_step(XPVTC *tc, I32 delta)
       TcPOS(tc) = -1;
       TcSTART_on(tc);
     }
+    return 0;
   } else {
     TcMATCH_on(tc);
+    return 1;
   }
 }
 

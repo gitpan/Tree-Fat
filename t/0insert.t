@@ -1,5 +1,5 @@
 use Test;  #-*-perl-*-
-BEGIN { todo test => 5 }
+BEGIN { todo test => 10 }
 
 use Tree::Fat;
 use lib './t';
@@ -65,5 +65,9 @@ sub insert2_test {
 }
 
 my $tv = 'Tree::Fat';
+insert_test($tv);
+insert2_test($tv);
+
+$tv->unique(0);
 insert_test($tv);
 insert2_test($tv);

@@ -1,16 +1,17 @@
-REFCNTS!
+perl REFCNTS!
 
 tvgen.pl
-  copy tvcommon.[ch] if newer
+  copy tvcommon.[ch] only if newer
+
 
 *** SCALING UP
 
-torture test
-
 allow treefill/depth updates to be switched off temporarily?
-  reduce the need for write locks == parallel insert mode!
+  reduce the need for write locks == parallel insert mode...?
 
-bulk insert/delete (for arrays)??
+optimized arrays ops: tc_splice(...) !!
+
+bigger torture test
 
 perl interface
   REFCNT!
@@ -20,7 +21,6 @@ perl interface
   array: mapkeys / mapvalues?
 
 OPTIMIZE!
-  bigger better benchmarks
 
 tc_delete
   try 2-level rotations?

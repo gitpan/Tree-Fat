@@ -1,11 +1,11 @@
-What is a Fat-Tree?  It's a cross between a tree and an array!
-
 Name           DSLI  Description                                  Info
 -----------    ----  -------------------------------------------- -----
 Tree::Fat      bdcO  Embeddable F-Tree Algorithm Suite            JPRIT
 
 Implements object-oriented trees using algorithms adapted from b-trees
 and AVL trees (without resorting to yucky C++).
+
+It's a cross between a tree and an array!
 
 
 The reasons for another tree implementation are as follows:
@@ -21,6 +21,14 @@ preserving the functional abstraction.
 
 
 Get it via http://www.perl.com/CPAN/authors/id/JPRIT/ !
+
+
+** 02-03-98 RELEASE 0.09
+
+- Fixed a serious bug in seek (when unique=1).  Expanded regression
+tests.
+
+- Minor tweaks.
 
 
 ** 01-23-98 RELEASE 0.07

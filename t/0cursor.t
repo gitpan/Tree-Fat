@@ -1,5 +1,5 @@
 use Test;  #-*-perl-*-
-BEGIN { todo test => 2 }
+BEGIN { todo test => 4 }
 
 use Tree::Fat;
 
@@ -58,4 +58,7 @@ sub cursor_test {
     ok(1);
 }
 
-cursor_test('Tree::Fat');
+my $p = 'Tree::Fat';
+cursor_test($p);
+$p->unique(0);
+cursor_test($p);

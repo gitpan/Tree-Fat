@@ -1,5 +1,5 @@
 use Test;  #-*-perl-*-
-BEGIN { todo test => 13 }
+BEGIN { todo test => 26 }
 
 use Tree::Fat;
 
@@ -46,4 +46,8 @@ sub null_test {
     $o->delete('bogus');
 }
 
-null_test('Tree::Fat');
+my $t = 'Tree::Fat';
+null_test($t);
+
+$t->unique(0);
+null_test($t);

@@ -1,5 +1,5 @@
 use Test;  #-*-perl-*-
-BEGIN { todo test => 2 }
+BEGIN { todo test => 4 }
 
 use Tree::Fat;
 use lib './t';
@@ -89,5 +89,9 @@ sub delete_test2 {
 
 my $tv = 'Tree::Fat';
 
+delete_test($tv);
+delete_test2($tv);
+
+$tv->unique(0);
 delete_test($tv);
 delete_test2($tv);
