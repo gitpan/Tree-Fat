@@ -1,3 +1,11 @@
+** 02-03-98 RELEASE 0.09
+
+- Fixed a serious bug in seek (when unique=1).  Expanded regression
+tests.
+
+- Minor tweaks.
+
+
 ** 01-23-98 RELEASE 0.07
 
 - Factored out code that isn't sensitive to key/data layout.

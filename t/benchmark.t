@@ -1,7 +1,7 @@
 # -*-perl-*- please
 
 use Test;
-BEGIN { todo tests => 1 }
+BEGIN { plan tests => 1 }
 
 use strict;
 use Tree::Fat;

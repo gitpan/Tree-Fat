@@ -9,7 +9,7 @@ require AutoLoader;
 
 @ISA = qw(Exporter DynaLoader);
 @EXPORT = qw();
-$VERSION = '1.00';
+$VERSION = '1.01';
 
 bootstrap Tree::Fat $VERSION;
 
@@ -51,7 +51,7 @@ all-terrain performance.
 
  TYPE       Speed       Flexibility  Scales     Memory   Keeps-Order
  ---------- ----------- ------------ ---------- -------- ------------
- Arrays     fastest     so-so        not good   min      yes
+ Arrays     fastest     so-so        not good   MIN      yes
  Hashes     fast        good         so-so      so-so    no
  Fat-Trees  medium      silly        big        good     yes
 
@@ -183,7 +183,11 @@ code properly.
 
 Get it via http://www.perl.com/CPAN/authors/id/JPRIT/ !
 
-=head1 DIRECTION
+=head1 TODO
+
+Optimize more!
+
+Clean up refcnts in test scripts.
 
 More documentation.
 

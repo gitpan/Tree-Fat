@@ -22,17 +22,16 @@ preserving the functional abstraction.
 Get it via http://www.perl.com/CPAN/authors/id/JPRIT/ !
 
 
+** 02-21-98 RELEASE 1.01
+
+- Hide tv_testmalloc unless TV_TEST is defined.
+
+- Migrated test scripts to the latest version of Test.pm.
+
+
 ** 02-08-98 RELEASE 1.00
 
 - Clarified documentation.  Bumped version number.
-
-
-** 02-03-98 RELEASE 0.09
-
-- Fixed a serious bug in seek (when unique=1).  Expanded regression
-tests.
-
-- Minor tweaks.
 
 
 Copyright © 1997-1998 Joshua Nathaniel Pritikin.  All rights reserved.

@@ -24,6 +24,7 @@ tv_set_debug(int mask)
 }
 #endif
 
+#ifdef TV_TEST
 void *
 tv_testmalloc(size_t size)
 {
@@ -37,6 +38,7 @@ tv_testmalloc(size_t size)
     TV_PANIC("out of memory!");
   }
 }
+#endif
 
 /* CCov: on */
 

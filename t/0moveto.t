@@ -1,5 +1,5 @@
 use Test;  #-*-perl-*-
-BEGIN { todo test => 4 }
+BEGIN { plan test => 4 }
 
 use Tree::Fat;
 

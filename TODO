@@ -1,6 +1,8 @@
 tvgen.pl
   copy tvcommon.[ch] only if newer
 
+avoid installing .so stuff?
+
 
 *** SCALING UP
 

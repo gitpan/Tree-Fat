@@ -14,7 +14,7 @@ if ($testmode) {
     symlink "setup/tv.test", "tietv.tmpl";
     symlink "setup/tvcommon0.test", "tvcommon0.h";
     push(@OBJ, qw(cover1.o cover2.o ccov_registry.o));
-    push(@PREREQ, 'Test' => 0.04, 'Devel::CCov' => 0.08, 'Time::HiRes' => '01.16');
+    push(@PREREQ, 'Devel::CCov' => 0.08, 'Time::HiRes' => '01.16');
     push(@FLAGS, '-g');
 } else {
     warn "...setting symlinks for launch\n";
@@ -27,7 +27,7 @@ my $prof = '-fprofile-arcs -ftest-coverage';
 
 WriteMakefile(
 	      NAME		=> 'Tree::Fat',
-	      PREREQ_PM		=> { Test => 0.03, @PREREQ },
+	      PREREQ_PM		=> { Test => 0.08, @PREREQ },
 	      EXE_FILES		=> [qw(tvgen.pl)],
 	      OPTIMIZE		=> join(' ', '-DDEBUGGING', '-O2', '-I.', @FLAGS),
 
